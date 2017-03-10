@@ -13,3 +13,4 @@
 [submodule "Libraries/glad"]
 	path = Libraries/glad
 	url = https://github.com/Dav1dde/glad.git
+	branch = c
