@@ -1,9 +1,6 @@
 [submodule "Libraries/assimp"]
 	path = Libraries/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "Libraries/glad"]
-	path = Libraries/glad
-	url = https://github.com/Dav1dde/glad.git
 [submodule "Libraries/glfw"]
 	path = Libraries/glfw
 	url = https://github.com/glfw/glfw.git
@@ -13,3 +10,6 @@
 [submodule "Libraries/stb"]
 	path = Libraries/stb
 	url = https://github.com/nothings/stb.git
+[submodule "Libraries/glad"]
+	path = Libraries/glad
+	url = https://github.com/Dav1dde/glad.git
