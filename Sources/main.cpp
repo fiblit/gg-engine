@@ -119,6 +119,28 @@ int main() {
 	stbi_image_free(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	image = stbi_load("..//Resources//container2_specular.png", &tex_width, &tex_height, &tex_channels, 0);
+	if (!image)
+		std::cerr << "Failed to load texture ..//Resources//container2_specular.png" << std::endl;
+	switch (tex_channels) {
+		case 1: tex_format = GL_ALPHA;     break;
+		case 2: tex_format = GL_LUMINANCE; break;
+		case 3: tex_format = GL_RGB;       break;
+		case 4: tex_format = GL_RGBA;      break;
+	}
+
+	GLuint tex_container_specular;
+	glGenTextures(1, &tex_container_specular);
+	glBindTexture(GL_TEXTURE_2D, tex_container_specular);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, tex_format, tex_width, tex_height, 0, tex_format, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(image);
+	glBindTexture(GL_TEXTURE_2D, 1);
+
     /* Game Loop */
 	D(std::cout << std::endl << "Entering Game Loop..." << std::endl << std::endl);
 	while (!glfwWindowShouldClose(window)) {
@@ -144,7 +166,7 @@ int main() {
 		cubeShader->use();
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "material.ambient"), 1.0f, 0.5f, 0.31f);
 		glUniform1i(glGetUniformLocation(cubeShader->getProgram(), "material.diffuse"), 0);
-		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "material.specular"), 1.0f, 0.5f, 0.31f);
+		glUniform1i(glGetUniformLocation(cubeShader->getProgram(), "material.specular"), 1);
 		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "material.shine"), 32.0f);
 
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.ambient"), lightAmbient.x, lightAmbient.y, lightAmbient.z);
@@ -157,6 +179,8 @@ int main() {
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tex_container);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, tex_container_specular);
 
 		glBindVertexArray(VAO[0]);
 		for (GLuint i = 0; i < 10; i++) {

@@ -1,7 +1,7 @@
 #version 330 core
 struct Material {
 	sampler2D diffuse;
-	vec3 specular;
+	sampler2D specular;
 	float shine; 
 };
 struct Light {
@@ -31,12 +31,14 @@ void main() {
 	// Diffuse
 	vec3 norm = normalize(Normal);
 	vec3 lightDir = normalize(lightPos - FragPos);
-	vec3 diffuse = light.diffuse * max(dot(lightDir, norm), 0.0) * vec3(texture(material.diffuse, TexCoords));
+	float diff = max(dot(lightDir, norm), 0.0);
+	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
 
 	// Specular
 	vec3 viewDir = normalize(-FragPos);
 	vec3 reflectDir = reflect(-lightDir, norm); // reflect by a's head at b's tail
-	vec3 specular = light.specular * material.specular * pow(max(dot(viewDir, reflectDir), 0.0), 32);
+	float spec =  pow(max(dot(viewDir, reflectDir), 0.0), material.shine);
+	vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
 
 	vec3 result = ambient + diffuse + specular;
 	color = vec4(result, 1.0f);
