@@ -1,9 +1,6 @@
 #include "main.hpp"
 
 int main() {
-
-	_CrtSetDbgFlag(_CRTDBG_CHECK_ALWAYS_DF);
-
     /* Load GLFW  */
 	D(std::cout << "Initializing GLFW for OpenGL 3.3...");
     glfwInit();
@@ -57,8 +54,8 @@ int main() {
 	timer = new Timer();
 
 	/* Shaders */
-	Shader* cubeShader = new Shader("..\\Shaders\\cube.vert", "..\\Shaders\\cube.frag");
-	Shader* lampShader = new Shader("..\\Shaders\\lamp.vert", "..\\Shaders\\lamp.frag");
+	Shader* cubeShader = new Shader(((std::string)PROJECT_SOURCE_DIR + (std::string)"/Shaders/cube.vert").c_str(), ((std::string)PROJECT_SOURCE_DIR + (std::string)"/Shaders/cube.frag").c_str());
+	Shader* lampShader = new Shader(((std::string)PROJECT_SOURCE_DIR + (std::string)"/Shaders/lamp.vert").c_str(), ((std::string)PROJECT_SOURCE_DIR + (std::string)"/Shaders/lamp.frag").c_str());
 	cam = new Camera();
 
 	/* Objects */
@@ -97,9 +94,9 @@ int main() {
 	/* Load textures */
 	GLenum tex_format;
 	GLint tex_width, tex_height, tex_channels;
-	GLubyte * image = stbi_load("..//Resources//container2.png", &tex_width, &tex_height, &tex_channels, 0);
+	GLubyte * image = stbi_load(((std::string)PROJECT_SOURCE_DIR + (std::string)"/Resources/container2.png").c_str(), &tex_width, &tex_height, &tex_channels, 0);
 	if (!image)
-		std::cerr << "Failed to load texture ..//Resources//container2.png" << std::endl;
+		std::cerr << "Failed to load texture ..//..//Resources//container2.png" << std::endl;
 	switch (tex_channels) {
 		case 1: tex_format = GL_ALPHA;     break;
 		case 2: tex_format = GL_LUMINANCE; break;
@@ -119,7 +116,7 @@ int main() {
 	stbi_image_free(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	image = stbi_load("..//Resources//container2_specular.png", &tex_width, &tex_height, &tex_channels, 0);
+	image = stbi_load(((std::string)PROJECT_SOURCE_DIR + (std::string)"/Resources/container2_specular.png").c_str(), &tex_width, &tex_height, &tex_channels, 0);
 	if (!image)
 		std::cerr << "Failed to load texture ..//Resources//container2_specular.png" << std::endl;
 	switch (tex_channels) {
