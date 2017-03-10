@@ -45,7 +45,7 @@ int main() {
 
 	/* Handle Viewport */
 	D(std::cout << "Creating viewport...");
-	int width; int height;
+	GLint width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 	D(OK());
@@ -57,9 +57,7 @@ int main() {
 	timer = new Timer();
 
 	/* Shaders */
-	D(std::cout << "cube" << std::endl);
 	Shader* cubeShader = new Shader("..\\Shaders\\cube.vert", "..\\Shaders\\cube.frag");
-	D(std::cout << "lamp" << std::endl);
 	Shader* lampShader = new Shader("..\\Shaders\\lamp.vert", "..\\Shaders\\lamp.frag");
 	cam = new Camera();
 
@@ -75,11 +73,14 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(obj::cube), obj::cube, GL_STATIC_DRAW);
 	// Position attr
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 	// Normal attr
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
+	// Tex Coords attr
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
 
 	// lamps
@@ -89,12 +90,34 @@ int main() {
 	// We only need to bind to the VBO, the container's VBO's data already contains the correct data.
 	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
 	// Position attr
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 
+	/* Load textures */
+	GLenum tex_format;
+	GLint tex_width, tex_height, tex_channels;
+	GLubyte * image = stbi_load("..//Resources//container2.png", &tex_width, &tex_height, &tex_channels, 0);
+	if (!image)
+		std::cerr << "Failed to load texture ..//Resources//container2.png" << std::endl;
+	switch (tex_channels) {
+		case 1: tex_format = GL_ALPHA;     break;
+		case 2: tex_format = GL_LUMINANCE; break;
+		case 3: tex_format = GL_RGB;       break;
+		case 4: tex_format = GL_RGBA;      break;
+	}
 
-	/* todo: textures */
+	GLuint tex_container;
+	glGenTextures(1, &tex_container);
+	glBindTexture(GL_TEXTURE_2D, tex_container);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, tex_format, tex_width, tex_height, 0, tex_format, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
     /* Game Loop */
 	D(std::cout << std::endl << "Entering Game Loop..." << std::endl << std::endl);
@@ -120,7 +143,7 @@ int main() {
 
 		cubeShader->use();
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "material.ambient"), 1.0f, 0.5f, 0.31f);
-		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "material.diffuse"), 1.0f, 0.5f, 0.31f);
+		glUniform1i(glGetUniformLocation(cubeShader->getProgram(), "material.diffuse"), 0);
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "material.specular"), 1.0f, 0.5f, 0.31f);
 		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "material.shine"), 32.0f);
 
@@ -131,7 +154,10 @@ int main() {
 
 		glUniformMatrix4fv(glGetUniformLocation(cubeShader->getProgram(), "proj"), 1, GL_FALSE, glm::value_ptr(proj));
 		glUniformMatrix4fv(glGetUniformLocation(cubeShader->getProgram(), "view"), 1, GL_FALSE, glm::value_ptr(view));
-		
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, tex_container);
+
 		glBindVertexArray(VAO[0]);
 		for (GLuint i = 0; i < 10; i++) {
 			model = glm::mat4();
