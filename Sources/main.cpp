@@ -57,8 +57,10 @@ int main() {
 	timer = new Timer();
 
 	/* Shaders */
-	Shader* cubeShader = new Shader("..\\Glitter\\Shaders\\cube.vert", "..\\Glitter\\Shaders\\cube.frag");
-	Shader* lampShader = new Shader("..\\Glitter\\Shaders\\lamp.vert", "..\\Glitter\\Shaders\\lamp.frag");
+	D(std::cout << "cube" << std::endl);
+	Shader* cubeShader = new Shader("..\\Shaders\\cube.vert", "..\\Shaders\\cube.frag");
+	D(std::cout << "lamp" << std::endl);
+	Shader* lampShader = new Shader("..\\Shaders\\lamp.vert", "..\\Shaders\\lamp.frag");
 	cam = new Camera();
 
 	/* Objects */
