@@ -5,7 +5,7 @@ struct Material {
 	float shine; 
 };
 struct Light {
-	vec3 pos;
+	vec4 pos;
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -23,14 +23,23 @@ in vec3 Normal;
 in vec3 FragPos;
 
 void main() {
-	vec3 lightPos = vec3(view * vec4(light.pos, 1.0f));
+	float epsilon = 0.00001;
 
 	// Ambient
 	vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
 	
 	// Diffuse
 	vec3 norm = normalize(Normal);
-	vec3 lightDir = normalize(lightPos - FragPos);
+	vec3 lightPos, lightDir;
+	if (abs(light.pos.w) < 0.0 + epsilon) {
+		lightPos = mat3(view) * light.pos.xyz;
+		lightDir = normalize(-lightPos);
+	}
+	else {
+		lightPos = vec3(view * light.pos);
+		lightDir = normalize(lightPos - FragPos);		
+	}
+
 	float diff = max(dot(lightDir, norm), 0.0);
 	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
 

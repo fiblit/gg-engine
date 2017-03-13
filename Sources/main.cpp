@@ -169,7 +169,7 @@ int main() {
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.ambient"), lightAmbient.x, lightAmbient.y, lightAmbient.z);
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.diffuse"), lightDiffuse.x, lightDiffuse.y, lightDiffuse.z);
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.specular"), lightSpecular.x, lightSpecular.y, lightSpecular.z);
-		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.pos"), lightPos.x, lightPos.y, lightPos.z);
+		glUniform4f(glGetUniformLocation(cubeShader->getProgram(), "light.pos"), lightPos.x, lightPos.y, lightPos.z, 0.0f);
 
 		glUniformMatrix4fv(glGetUniformLocation(cubeShader->getProgram(), "proj"), 1, GL_FALSE, glm::value_ptr(proj));
 		glUniformMatrix4fv(glGetUniformLocation(cubeShader->getProgram(), "view"), 1, GL_FALSE, glm::value_ptr(view));
