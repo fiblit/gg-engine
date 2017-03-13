@@ -166,10 +166,15 @@ int main() {
 		glUniform1i(glGetUniformLocation(cubeShader->getProgram(), "material.specular"), 1);
 		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "material.shine"), 32.0f);
 
+		glUniform1i(glGetUniformLocation(cubeShader->getProgram(), "light.mode"), 2);
+
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.ambient"), lightAmbient.x, lightAmbient.y, lightAmbient.z);
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.diffuse"), lightDiffuse.x, lightDiffuse.y, lightDiffuse.z);
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.specular"), lightSpecular.x, lightSpecular.y, lightSpecular.z);
-		glUniform4f(glGetUniformLocation(cubeShader->getProgram(), "light.pos"), lightPos.x, lightPos.y, lightPos.z, 1.0f);
+
+		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.pos"), cam->pos.x, cam->pos.y, cam->pos.z);
+		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.dir"), cam->dir.x, cam->dir.y, cam->dir.z);
+		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.cutOff"), glm::cos(glm::radians(12.5f)));
 
 		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.linear"), 0.09f);
