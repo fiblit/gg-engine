@@ -156,7 +156,7 @@ int main() {
 		glm::mat4 model;
 
 		glm::vec3 lightDiffuse = glm::vec3(0.5f,0.5f,0.5f); // Decrease the influence
-		glm::vec3 lightAmbient = glm::vec3(0.2f,0.2f,0.2f); // Low influence
+		glm::vec3 lightAmbient = glm::vec3(0.05f,0.05f,0.05f); // Low influence
 		glm::vec3 lightSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
 		glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
@@ -175,10 +175,11 @@ int main() {
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.pos"), cam->pos.x, cam->pos.y, cam->pos.z);
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "light.dir"), cam->dir.x, cam->dir.y, cam->dir.z);
 		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.cutOff"), glm::cos(glm::radians(12.5f)));
+		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.fadeOff"), glm::cos(glm::radians(17.5f)));
 
 		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.linear"), 0.09f);
-		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.quadratic"), 0.032f);
+		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.linear"), 0.045f);
+		glUniform1f(glGetUniformLocation(cubeShader->getProgram(), "light.quadratic"), 0.0075f);
 
 		glUniformMatrix4fv(glGetUniformLocation(cubeShader->getProgram(), "proj"), 1, GL_FALSE, glm::value_ptr(proj));
 		glUniformMatrix4fv(glGetUniformLocation(cubeShader->getProgram(), "view"), 1, GL_FALSE, glm::value_ptr(view));
