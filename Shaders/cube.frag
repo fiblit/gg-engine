@@ -75,20 +75,12 @@ void main() {
 	result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
   
 	color = vec4(result, 1.0);
-
-	/* TODO */
-	/* organize to:
-		do geometric calculations
-		do lighting calculations
-	*/
-	// rename variables to be more coherent
-	// restructure to be more coherent
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	// convert to view space
-	//lightPos = mat3(view) * light.pos
-	vec3 lightDir = normalize(-light.direction);//-lightPos);
+	vec3 lightDir = mat3(view) * light.direction;
+	lightDir = normalize(-lightDir);
 	// Diffuse effect
 	float d = max(dot(normal, lightDir), 0.0);
 	// Specular effect
