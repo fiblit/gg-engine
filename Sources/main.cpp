@@ -35,9 +35,18 @@ int main() {
 	glfwSetScrollCallback(window, scroll_callback);
 	D(OK());
 
-	/* load OpenGL 3.3 functions with glad */
+	/* load all OpenGL functions */
 	D(std::cout << "Loading OpenGL with glad...");
-	gladLoadGL();
+	// via glad using the glfw loader function
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		std::cerr << "Failed to initialize OpenGL context" << std::endl;
+		return DIE(EXIT_FAILURE);
+	}
+	// Alternative use the builtin loader, e.g. if no other loader function is available
+	/*if (!gladLoadGL()) {
+		std::cerr << "Failed to initialize OpenGL context" << std::endl;
+		return DIE(EXIT_FAILURE);
+	}*/
 	D(std::cout << "OK ::: OpenGL " << glGetString(GL_VERSION) << std::endl);
 
 	/* Handle Viewport */
@@ -164,7 +173,7 @@ int main() {
 			glm::vec3(-4.0f,  2.0f, -12.0f),
 			glm::vec3(0.0f,  0.0f, -3.0f)
 		};
-		glm::vec3 dirLightDir = glm::vec3(0.7f, 0.2f, 2.0f);
+		glm::vec3 dirLightDir = glm::vec3(0.0f, -1.0f, 0.0f);
 
 		cubeShader->use();
 		/*TODO: something to make these lines shorter / not as many */
@@ -178,7 +187,7 @@ int main() {
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "dirLight.diffuse"), lightDiffuse.x, lightDiffuse.y, lightDiffuse.z);
 		glUniform3f(glGetUniformLocation(cubeShader->getProgram(), "dirLight.specular"), lightSpecular.x, lightSpecular.y, lightSpecular.z);
 
-		for (int i = 0; i < 4; i++) {
+		for (GLuint i = 0; i < 4; i++) {
 			std::string si = "pointLights[" + std::to_string(i) + "].";
 			glUniform3f(glGetUniformLocation(cubeShader->getProgram(), (si + "position").c_str()), pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
 			glUniform1f(glGetUniformLocation(cubeShader->getProgram(), (si + "constant").c_str()), 1.0f);
