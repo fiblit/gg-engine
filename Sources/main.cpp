@@ -63,8 +63,8 @@ int main() {
 	timer = new Timer();
 
 	/* Shaders */
-	Shader* cubeShader = new Shader(((std::string)PROJECT_SOURCE_DIR + (std::string)"/Shaders/cube.vert").c_str(), ((std::string)PROJECT_SOURCE_DIR + (std::string)"/Shaders/cube.frag").c_str());
-	Shader* lampShader = new Shader(((std::string)PROJECT_SOURCE_DIR + (std::string)"/Shaders/lamp.vert").c_str(), ((std::string)PROJECT_SOURCE_DIR + (std::string)"/Shaders/lamp.frag").c_str());
+	Shader* cubeShader = new Shader(((std::string)PROJECT_SOURCE_DIR + "/Shaders/cube.vert").c_str(), ((std::string)PROJECT_SOURCE_DIR + "/Shaders/cube.frag").c_str());
+	Shader* lampShader = new Shader(((std::string)PROJECT_SOURCE_DIR + "/Shaders/lamp.vert").c_str(), ((std::string)PROJECT_SOURCE_DIR + "/Shaders/lamp.frag").c_str());
 	cam = new Camera();
 
 	/* Objects */
@@ -103,7 +103,7 @@ int main() {
 	/* Load textures */
 	GLenum tex_format;
 	GLint tex_width, tex_height, tex_channels;
-	GLubyte * image = stbi_load(((std::string)PROJECT_SOURCE_DIR + (std::string)"/Resources/container2.png").c_str(), &tex_width, &tex_height, &tex_channels, 0);
+	GLubyte * image = stbi_load(((std::string)PROJECT_SOURCE_DIR + "/Resources/container2.png").c_str(), &tex_width, &tex_height, &tex_channels, 0);
 	if (!image)
 		std::cerr << "Failed to load texture ..//..//Resources//container2.png" << std::endl;
 	switch (tex_channels) {
