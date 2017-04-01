@@ -14,10 +14,11 @@ At some point there will be the following:
 * Render/lighting module (urgent : 5611)
 * Physics/simulation module (not urgent; soon)
 * AI/planning module (urgent : 5611)
+* Math module (3rd party, and for efficiency might change; currently using GLM)
+* OS I/O module (3rd party, and might change 3rd party; currently using GLFW, assimp, and stb)
 * UI module (not urgent; soon)
   * GUI unit (not urgent)
-* Math module (3rd party, and for efficiency might change; currently using GLM)
-* I/O module (3rd party, and might change 3rd party; currently using GLFW, assimp, and stb) 
+* Test module (testing / debug-vis / debug-only-code / etc.)
 
 # Build
 To Init:
