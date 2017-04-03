@@ -6,6 +6,10 @@
 #include <glad/glad.h>
 // glm: OpenGL mathematics: http://glm.g-truc.net/0.9.8/index.html
 #include <glm/glm.hpp>
+// assimp: model loading: https://github.com/assimp/assimp
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 #include <string>
 #include <vector>
@@ -22,6 +26,7 @@ struct Texture {
     GLuint id;
     //should really be an enum
     std::string type;
+    aiString path;
 };
 
 class Mesh {
