@@ -1,4 +1,7 @@
 #include "debug.hpp"
+#include <chrono>
+#include <thread>
+#include <iostream>
 
 D(
 void slowPrint(int middle, int after, std::string txt) {
@@ -13,6 +16,6 @@ void slowPrint(int middle, int after, std::string txt) {
 
 D(
 void OK() {
-	std::cout << "OK" << std::endl;
+	std::cout << "OK\n";
 }
 )

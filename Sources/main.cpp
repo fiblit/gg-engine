@@ -22,7 +22,7 @@ int main() {
 	std::string title = "Dalton Hildreth ::: gg engine ::: OpenGL v3.3";
     GLFWwindow* window = glfwCreateWindow(G::WIN_WIDTH, G::WIN_HEIGHT, title.c_str(), monitor, nullptr);
     if (window == nullptr) {
-		std::cerr << "Failed to create OpenGL Context" << std::endl;
+		std::cerr << "Failed to create OpenGL Context\n";
 		return DIE(EXIT_FAILURE);
     }
 	glfwMakeContextCurrent(window);
@@ -39,15 +39,15 @@ int main() {
 	D(std::cout << "Loading OpenGL with glad...");
 	// via glad using the glfw loader function
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cerr << "Failed to initialize OpenGL context" << std::endl;
+		std::cerr << "Failed to initialize OpenGL context\n";
 		return DIE(EXIT_FAILURE);
 	}
 	// Alternative use the builtin loader, e.g. if no other loader function is available
 	/*if (!gladLoadGL()) {
-		std::cerr << "Failed to initialize OpenGL context" << std::endl;
+		std::cerr << "Failed to initialize OpenGL context\n";
 		return DIE(EXIT_FAILURE);
 	}*/
-	D(std::cout << "OK ::: OpenGL " << glGetString(GL_VERSION) << std::endl);
+	D(std::cout << "OK ::: OpenGL " << glGetString(GL_VERSION) << "\n");
 
 	/* Handle Viewport */
 	D(std::cout << "Creating viewport...");
@@ -105,7 +105,7 @@ int main() {
 	GLint tex_width, tex_height, tex_channels;
 	GLubyte * image = stbi_load(((std::string)PROJECT_SOURCE_DIR + "/Resources/container2.png").c_str(), &tex_width, &tex_height, &tex_channels, 0);
 	if (!image)
-		std::cerr << "Failed to load texture ..//..//Resources//container2.png" << std::endl;
+		std::cerr << "Failed to load texture ..//..//Resources//container2.png\n";
 	switch (tex_channels) {
 		case 1: tex_format = GL_ALPHA;     break;
 		case 2: tex_format = GL_LUMINANCE; break;
@@ -127,7 +127,7 @@ int main() {
 
 	image = stbi_load(((std::string)PROJECT_SOURCE_DIR + (std::string)"/Resources/container2_specular.png").c_str(), &tex_width, &tex_height, &tex_channels, 0);
 	if (!image)
-		std::cerr << "Failed to load texture ..//Resources//container2_specular.png" << std::endl;
+		std::cerr << "Failed to load texture ..//Resources//container2_specular.png\n";
 	switch (tex_channels) {
 		case 1: tex_format = GL_ALPHA;     break;
 		case 2: tex_format = GL_LUMINANCE; break;
@@ -148,7 +148,7 @@ int main() {
 	glBindTexture(GL_TEXTURE_2D, 1);
 
     /* Game Loop */
-	D(std::cout << std::endl << "Entering Game Loop..." << std::endl << std::endl);
+	D(std::cout << "\nEntering Game Loop...\n\n");
 	while (!glfwWindowShouldClose(window)) {
 		timer->tick();
 
@@ -251,7 +251,7 @@ int main() {
 		//Double Buffer
 		glfwSwapBuffers(window);
     }
-	D(std::cout << std::endl << "Exiting Game Loop..." << std::endl << std::endl);
+	D(std::cout << "\nExiting Game Loop...\n\n");
 	
 
 	// Properly de-allocate all resources once they've outlived their purpose
@@ -267,7 +267,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	if (action == GLFW_PRESS) {
-		D(std::cout << "Key Pressed: " << /*glfwGetKeyName(key, key)*/ key << std::endl);
+		D(std::cout << "Key Pressed: " << /*glfwGetKeyName(key, key)*/ key << "\n");
 		keys[key] = true;
 	}
 	else if (action == GLFW_RELEASE) {
@@ -310,7 +310,7 @@ void do_movement() {
 int DIE(int retVal) {
 	glfwTerminate();
 
-	std::cerr << std::endl << "Application Terminated. With exit value: " << retVal << std::endl;
+	std::cerr << "\nApplication Terminated. With exit value: " << retVal << "\n";
 	D(slowPrint(50, 300, "\n\nGoodbye..."));
 	D(slowPrint(150, 500, "OK"));
 
