@@ -1,47 +1,68 @@
-cd ..
-rm -rf lib/*/
-cd lib
+#!/bin/bash
 
-echo "\n\nLib deleted\n\n"
+printf "%-45s" "Removing old 3rd-party libs..."
+{
+    if [ pwd == .*"gg-engine/lib/"]; then
+        cd ..
+    fi
+    if [pwd != .*"gg-engine"]; then
+        printf "ERROR: wrong dir\ngoto gg-engine/lib or gg-engine"
+        exit
+    fi
+    rm -rf lib/*/
+    cd lib
+} &> /dev/null
+printf "%15s\n" "Done."
+printf "%-45s\n" "Downloading latest 3rd-party libs..."
 
 # Refresh Catch
-mkdir Catch
-cd Catch
-curl -s https://api.github.com/repos/philsquared/Catch/releases/latest | jq --raw-output '.assets[0] | .browser_download_url' | xargs wget
-cd ..
-
-echo "\n\nCatch refreshed\n\n"
+printf "%-45s" "Downloading latest catch.hpp..."
+{
+    mkdir Catch
+    cd Catch
+    curl -s https://api.github.com/repos/philsquared/Catch/releases/latest | jq --raw-output '.assets[0] | .browser_download_url' | xargs wget
+    cd ..
+} &> /dev/null
+printf "%15s\n" "Done."
 
 # Refresh glad
-mkdir glad
-cd glad
-pip install --user glad
-glad --out-path=. --generator=c --local-files --spec=gl
-cd ..
-
-echo "\n\nglad Refreshed\n\n"
+printf "%-45s" "Install glad and generate latest..."
+{
+    mkdir glad
+    cd glad
+    pip install --user glad
+    glad --out-path=. --generator=c --local-files --spec=gl
+    cd ..
+} &> /dev/null
+printf "%15s\n" "Done."
 
 #Refresh glfw/glm/assimp
-git clone --depth=1 https://github.com/glfw/glfw.git
-git clone --depth=1 https://github.com/g-truc/glm.git
-git clone --depth=1 https://github.com/assimp/assimp.git
-
-echo "\n\n glfw, glm, assimp cloned \n\n"
+printf "%-45s" "Downloading latest version of glfw..."
+git clone --depth=1 https://github.com/glfw/glfw.git &> /dev/null
+printf "%15s\n" "Done."
+printf "%-45s" "Downloading latest version of glm..."
+git clone --depth=1 https://github.com/g-truc/glm.git &> /dev/null
+printf "%15s\n" "Done."
+printf "%-45s" "Downloading latest version of assimp..."
+git clone --depth=1 https://github.com/assimp/assimp.git &> /dev/null
+printf "%15s\n" "Done."
 
 #Refresh stb_image*
-git clone --depth=1 https://github.com/nothings/stb.git
-# find . -not -name 'stb_image.h' | xargs rm -rf
-mv stb/stb_image.h .
-# mv stb/stb_image_write.h .
-rm -rf stb
-
-echo "\n\n stb_image refreshed \n\n"
+printf "%-45s" "Downloading latest version of stb_image.h..."
+{
+    git clone --depth=1 https://github.com/nothings/stb.git
+    # find . -not -name 'stb_image.h' | xargs rm -rf
+    mv stb/stb_image.h .
+    # mv stb/stb_image_write.h .
+    rm -rf stb
+} &> /dev/null
+printf "%15s\n" "Done."
 
 #Remove the git histories. (unneeded)
-find . -name '.git' | xargs rm -rf #linux only ...
-
-echo "\n\n git histories destroyed \n\n"
-echo "\n\n done \n\n"
-
-cd ..
+printf "%-45s" "Cleaning libs..."
+{
+    cd ..
+    find lib -name '.git' | xargs rm -rf
+} &> /dev/null
+printf "%15s\n" "Done."
 
