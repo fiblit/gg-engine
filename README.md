@@ -7,18 +7,60 @@ I didn't use Bullet, but I used every other library from it.
 
 I used http://learnopengl.com to, well, learn OpenGL, so some of his code is in mine to do rendering.
 
+
+
 # Plan
 At some point there will be the following:
-* Manager/interface module (not urgent; soon) 
-  * Memory Unit (not urgent)
-* Render/lighting module (urgent : 5611)
-* Physics/simulation module (not urgent; soon)
-* AI/planning module (urgent : 5611)
-* Math module (3rd party, and for efficiency might change; currently using GLM)
-* OS I/O module (3rd party, and might change 3rd party; currently using GLFW, assimp, and stb)
-* UI module (not urgent; soon)
-  * GUI unit (not urgent)
+* Manager/interface module 
+    * timer
+    * Memory Unit
+        * pool
+* Render/lighting module
+    * scene\_graph
+    * light
+    * mesh
+    * texture
+    * shader
+    * model
+    * primitive mesh
+        * line/cylinder
+        * cubic/quad
+        * ellipsoid/ellipse
+        * triangle/prism
+        * k-DOP
+* Physics/simulation module
+    * BVH
+    * collider
+    * particle
+    * integrator
+* AI/planning module
+    * Agent
+    * PRM
+    * Graph
+    * Global (may not actually be a module)
+        * A\*
+        * RRT\*
+    * Local (may not actually be a module)
+        * Boids
+        * TTC
+        * VBO
+        * ORCA
+* Math module 
+    * glm
+* OS I/O module 
+    * parser for any internal format (levels/scenes/etc.)
+    * image loader -- stb\_image
+    * mesh loader -- assimp
+    * writer (for any internal format/log)
+* UI module 
+  * Terminal/CLI input
+  * Keymapper
+  * GUI
 * Test module (testing / debug-vis / debug-only-code / etc.)
+    * unit test suite
+    * visual debug overlay
+    * debug only
+    * benchmarking / logger
 
 # Build
 To Init:
