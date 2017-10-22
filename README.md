@@ -1,16 +1,9 @@
 # Author
 Dalton Hildreth
 
-# Resources:
-I used [Glitter](http://polytonic.github.io/Glitter/) to get the boilerplate of OpenGL/GLFW working.
-I didn't use Bullet, but I used every other library from it.
-
-I used http://learnopengl.com to, well, learn OpenGL, so some of his code is in mine to do rendering.
-
-
-
 # Plan
-At some point there will be the following:
+At some point there will be the following components, perhaps rearranged when
+I read more about Game Engine Architecture, or as I decide something is better:
 * Manager/interface module 
     * timer
     * Memory Unit
@@ -62,23 +55,29 @@ At some point there will be the following:
     * debug only
     * benchmarking / logger
 
+# Resources:
+I used http://learnopengl.com to, well, learn OpenGL, so some of my code is
+based on his to do rendering.
+
 # Build
-To Init:
-```
-git --recursive clone https://github.com/fiblit/gg-engine.git
-```
+gg is written to be cross-platform, however, at the moment the build system's
+first step (fetching) is not windows compatible. I am working to fix this.
 
-To Build:
+## Linux/OS X
+In the terminal perform the following to go from nothing to a running build:
 ```
-cd Build
-# UNIX Makefile
-# Although, this might work anywhere.
-cmake ..
-
-# Mac OSX
-# cmake -G "Xcode" ..
-
-# Microsoft Windows
-# cmake -G "Visual Studio 14" ..
-# cmake -G "Visual Studio 14 Win64" ..
+$ git clone https://github.com/fiblit/gg-engine.git
+$ cd gg-engine
+$ . lib/init.sh
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ ./bin/gg-engine
+```
+If you run into issues, it may be because you don't have bash or CMake. On
+Linux, do this to get them:
+```
+$ sudo apt-get install cmake
+$ sudo apt-get install bash
 ```
