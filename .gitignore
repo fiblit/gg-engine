@@ -1,6 +1,10 @@
+\.*
+!\.git*
 [Bb]uild/
 [Bb]in/
 [Oo]bj/
 [Cc][Mm]ake[Ff]iles/
 [Ll]ib/
 ![Ll]ib/init.sh
+![Ll]ib/PURPOSE
+![Ll]ib/CMakeLists.txt

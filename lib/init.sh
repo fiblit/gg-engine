@@ -2,14 +2,14 @@
 
 printf "%-45s" "Removing old 3rd-party libs..."
 {
-    if [ pwd == .*"gg-engine/lib/"]; then
+    if [pwd == .*"gg-engine/lib/"]; then
         cd ..
     fi
     if [pwd != .*"gg-engine"]; then
         printf "ERROR: wrong dir\ngoto gg-engine/lib or gg-engine"
         exit
     fi
-    rm -rf lib/*/
+    rm -rf lib/*/ lib/catch.hpp lib/stb_image.h
     cd lib
 } &> /dev/null
 printf "%15s\n" "Done."
@@ -17,18 +17,17 @@ printf "%-45s\n" "Downloading latest 3rd-party libs..."
 
 # Refresh Catch
 printf "%-45s" "Downloading latest catch.hpp..."
-{
-    mkdir Catch
-    cd Catch
-    curl -s https://api.github.com/repos/philsquared/Catch/releases/latest | jq --raw-output '.assets[0] | .browser_download_url' | xargs wget
-    cd ..
-} &> /dev/null
+curl -s https://api.github.com/repos/philsquared/Catch/releases/latest \
+    | jq --raw-output '.assets[0] | .browser_download_url' \
+    | xargs wget \
+    &> /dev/null
 printf "%15s\n" "Done."
 
 # Refresh glad
 printf "%-45s" "Install glad and generate latest..."
 {
     mkdir glad
+    cp CMakeLists.txt glad/CMakeLists.txt
     cd glad
     pip install --user glad
     glad --out-path=. --generator=c --local-files --spec=gl
