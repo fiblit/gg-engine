@@ -7,7 +7,10 @@
     #error windows.h included
 #endif
 #include <GLFW/glfw3.h>
+#include <glm/vec2.hpp>
 #include <iostream>
+
+#include "render.h"
 
 using namespace std;
 
@@ -55,17 +58,17 @@ int main(int, char**) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //for Mac OSX to work
-
-    int width = min(640, mode0->width);
-    int height = min(480, mode0->height);
-    GLFWwindow* window = glfwCreateWindow(width, height, "gg", nullptr, nullptr);
+    glm::vec<2, int> size(min(640, mode0->width), min(480, mode0->height));
+    GLFWwindow* window = glfwCreateWindow(size.x, size.y, "gg", nullptr, nullptr);
     if (!window) {
         cerr << "gg! Failed to create window context.\n";
         glfwTerminate();
         return EXIT_FAILURE;
     }
-    glfwMakeContextCurrent(window);
+    //center window
+    glfwSetWindowPos(window, mode0->width/2 - size.x/2, mode0->height/2 - size.y/2);
     glfwSetFramebufferSizeCallback(window, framebuffer_resize);
+    glfwMakeContextCurrent(window);
 
     //load glad in window context
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
@@ -74,12 +77,13 @@ int main(int, char**) {
         return EXIT_FAILURE;
     }
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, size.x, size.y);
+
+    draw_init();
 
     //main loop
     while (!glfwWindowShouldClose(window)) {
-        //render
-        glClear(GL_COLOR_BUFFER_BIT);
+        draw();
 
         //double buffer
         glfwSwapBuffers(window);

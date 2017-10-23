@@ -30,7 +30,7 @@ printf "%-45s" "Install glad and generate latest..."
     cp CMakeLists.txt glad/CMakeLists.txt
     cd glad
     pip install --user glad
-    glad --out-path=. --generator=c --local-files --spec=gl
+    glad --out-path=. --generator=c --local-files --spec=gl --no-loader
     cd ..
 } &> /dev/null
 printf "%15s\n" "Done."

@@ -69,6 +69,7 @@ bool Shader::compile(GLenum type, const string content) {
         glGetShaderInfoLog(shader_object, 512, nullptr, info_log);
         cerr << "gg! Shader failed to compile:\n" << info_log << "\n";
     }
+    shader_objects.push_back(shader_object);
     return success;
 }
 
@@ -79,9 +80,9 @@ bool Shader::link() {
     glLinkProgram(program);
 
     //check for errors
-    glGetShaderiv(program, GL_LINK_STATUS, &success);
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(program, 512, nullptr, info_log);
+        glGetProgramInfoLog(program, 512, nullptr, info_log);
         cerr << "gg! Shader failed to link:\n" << info_log << "\n";
     }
     return success;
