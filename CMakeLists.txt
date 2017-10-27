@@ -11,9 +11,6 @@ option(ASSIMP_BUILD_SAMPLES OFF)
 option(ASSIMP_BUILD_TESTS OFF)
 add_subdirectory(lib/assimp)
 
-#this subdirectory is a CMake file I provide
-add_subdirectory(lib/glad)
-
 #catch, glm, and stb_image are header only libraries
 
 include_directories(src/)
@@ -85,12 +82,17 @@ if(NOT WIN32)
     set(DLLOAD dl)
 endif()
 
+#to avoid compiler warnings i seperately build these
+add_library(glad ${PROJECT_SOURCE_DIR}/lib/glad/glad.c)
+add_library(stb_image ${PROJECT_SOURCE_DIR}/lib/stb_image.cpp)
+
 add_executable(${PROJECT_NAME} ${PROJECT_SRC} ${PROJECT_LIB})
 
 target_link_libraries(
     ${PROJECT_NAME}
     assimp
     glad
+    stb_image
     glfw ${GLFW_LIBRARIES}
     ${DLLOAD}
     #catch, glm, stb_image are header only

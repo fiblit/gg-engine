@@ -4,6 +4,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "io.h"
 
+#include "debug.h"
+
 using namespace std;
 using namespace std::experimental;
 
@@ -14,8 +16,9 @@ Shader::Shader()
 
 Shader::~Shader() {
     for (auto& sobj : shader_objects) {
-        glDeleteShader(sobj);
-        sobj = 0;
+        glDetachShader(program, sobj.first);
+        glDeleteShader(sobj.first);
+        sobj.first = 0;
     }
     shader_objects.clear();
     glDeleteProgram(program);
@@ -44,7 +47,7 @@ bool Shader::build() {
     program = glCreateProgram();
     shader_objects.clear();
     for (const auto& pair : file_types) {
-        compile(pair.second, *read_file(pair.first));
+        compile(pair.second, pair.first);
     }
     if (success) {
         link();
@@ -57,7 +60,9 @@ void Shader::use() {
     glUseProgram(program);
 }
 
-bool Shader::compile(GLenum type, const string content) {
+bool Shader::compile(GLenum type, const string& path) {
+    string content = *read_file(path);
+
     GLuint shader_object = glCreateShader(type);
     const char* c = content.c_str();
     glShaderSource(shader_object, 1, &c, nullptr);
@@ -67,15 +72,16 @@ bool Shader::compile(GLenum type, const string content) {
     glGetShaderiv(shader_object, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(shader_object, 512, nullptr, info_log);
-        cerr << "gg! Shader failed to compile:\n" << info_log << "\n";
+        cerr << "gg! Shader (" << path << ") failed to compile:\n" 
+             << info_log << "\n";
     }
-    shader_objects.push_back(shader_object);
+    shader_objects.push_back(make_pair(shader_object, path));
     return success;
 }
 
 bool Shader::link() {
     for (auto& sobj : shader_objects) {
-        glAttachShader(program, sobj);
+        glAttachShader(program, sobj.first);
     }
     glLinkProgram(program);
 
@@ -83,19 +89,19 @@ bool Shader::link() {
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(program, 512, nullptr, info_log);
-        cerr << "gg! Shader failed to link:\n" << info_log << "\n";
+        cerr << "gg! Shaders failed to link:\n" << info_log << "\n";
     }
     return success;
 }
 
 optional<GLint> Shader::check_uniform(string uniform) {
     if (uniform.substr(3) == "gl_") {
-        cerr << "gg! Shader cannot use gl_ before uniforms " << uniform << "\n";
+        cerr << "gg! Shaders cannot use gl_ before uniforms " << uniform << "\n";
         return nullopt;
     } 
     GLint loc = glGetUniformLocation(program, uniform.c_str());
     if (loc == -1) {
-        cerr << "gg! Shader does not contain uniform " << uniform << "\n";
+        cerr << "gg! Shaders do not contain uniform " << uniform << "\n";
         return nullopt;
     }
     return loc;
@@ -103,6 +109,10 @@ optional<GLint> Shader::check_uniform(string uniform) {
 
 void Shader::set(string uniform, GLint i) {
     glUniform1i(*check_uniform(uniform), i);
+}
+
+void Shader::set(string uniform, GLuint u) {
+    glUniform1ui(*check_uniform(uniform), u);
 }
 
 void Shader::set(string uniform, GLfloat f) {
