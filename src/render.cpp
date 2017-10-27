@@ -1,67 +1,82 @@
 #include "render.h"
 #include <glad.h>
+#include <stb_image.h>
+#include <vector>
 #include <string>
-#include "Shader.h"
 #include <iostream>
-#include "debug.h"
+#include <memory>
+#include "Shader.h"
+#include "Mesh.h"
+#include "io.h"
 
 using namespace std;
 
-//TODO: move this off into a class that handles all mesh things for me
-struct Mesh {
-    uint VBO;
-    uint VAO;
-    uint IBO;
-};
+shared_ptr<Shader> tricolor;
+shared_ptr<Mesh> tri;
 
-Shader tricolor;
-Mesh tri;
+GLuint create_tex(std::string path) {
+    auto img = read_image(path);
+    if (!img) {
+        cerr << "gg! Failed to create texture of " << path << "\n";
+        return 0;
+    }
+
+	GLenum format = GL_RGB;
+    if (img->channels == 1) {
+        format = GL_RED;
+    } else if (img->channels == 3) {
+        format = GL_RGB;
+    } else if (img->channels == 4) {
+        format = GL_RGBA;
+    }
+
+    GLuint tex = 0;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(format),
+	    img->width, img->height, 0,
+        format, GL_UNSIGNED_BYTE, img->bytes);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_image_free(img->bytes);//would prefer if this was solved by RAII
+    return tex;
+}
 
 void draw_init() {
-    //test that all functions can work before moving it off into a mesh.
-    //gotta be incremental about this!
-    const float mesh_vertices[4*3] {
-         .5f,  .5f, .0f,
-         .5f, -.5f, .0f,
-        -.5f,  .5f, .0f,
-        -.5f, -.5f, .0f
+    string pwd(PROJECT_SRC_DIR);
+
+    vector<Vertex> vertices = {
+        {glm::vec3(.5f, .5f, .0f), glm::vec3(0, 0, 1), glm::vec2(1, 1)},
+        {glm::vec3(.5f,-.5f, .0f), glm::vec3(0, 0, 1), glm::vec2(1, 0)},
+        {glm::vec3(-.5f,.5f, .0f), glm::vec3(0, 0, 1), glm::vec2(0, 1)},
+        {glm::vec3(-.5f,-.5f,.0f), glm::vec3(0, 0, 1), glm::vec2(0, 0)}
     };
-    const uint mesh_indices[2*3] {
+    vector<GLuint> indices = {
         0, 1, 2,
         1, 2, 3
     };
+    vector<Texture> textures = {
+        {create_tex(pwd + "/res/container2.png"), Texmap::diffuse}
+    };
 
-    //generate
-    glGenBuffers(1, &tri.VBO);
-    glGenBuffers(1, &tri.IBO);
-    glGenVertexArrays(1, &tri.VAO);
-
-    //bind
-    glBindVertexArray(tri.VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, tri.VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tri.IBO);
-
-    //buffer & interpret
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mesh_vertices), mesh_vertices, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mesh_indices), mesh_indices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    //clean up
-    glBindVertexArray(0);
+    tri = shared_ptr<Mesh>(new Mesh(vertices, indices, textures));
+    tricolor = shared_ptr<Shader>(new Shader());
 
     //build material
-    string pwd(PROJECT_SRC_DIR);
-    tricolor.add(GL_VERTEX_SHADER, pwd + "/res/glsl/ivec3_1to1.vert");
-    tricolor.add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/flat_red.frag");
-    tricolor.build();
+    tricolor->add(GL_VERTEX_SHADER, pwd + "/res/glsl/1to1_tex.vert");
+    tricolor->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/tex.frag");
+    tricolor->build();
+    tri->set_material(tricolor);
 }
 
 void draw() {
     glClearColor(.2f, .2f, .2f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    tricolor.use();
-    glBindVertexArray(tri.VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    tri->draw();
 }
