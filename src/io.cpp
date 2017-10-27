@@ -1,6 +1,7 @@
 #include "io.h"
 #include <fstream>
 #include <iostream>
+#include <stb_image.h>
 
 using namespace std;
 using namespace std::experimental;
@@ -23,3 +24,13 @@ optional<const string> read_file(const string path) {
 
     return content;
 }
+optional<Image> read_image(const string path) {
+    Image i;
+    i.bytes = stbi_load(path.c_str(), &i.width, &i.height, &i.channels, 0);
+    if (i.bytes) {
+        return i;
+    } else {
+        return nullopt;
+    }
+}
+
