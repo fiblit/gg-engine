@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 #include <iostream>
+#include <cstdlib>
 
 #include "render.h"
 
@@ -79,7 +80,7 @@ int main(int, char**) {
 
     glViewport(0, 0, size.x, size.y);
 
-    draw_init();
+    draw_init(size);
 
     //main loop
     while (!glfwWindowShouldClose(window)) {
