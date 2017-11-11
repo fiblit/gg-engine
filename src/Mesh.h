@@ -31,7 +31,7 @@ public:
         const std::vector<Texture>& textures);
     void set_material(std::shared_ptr<Shader> material);
     void draw();
-private:
+protected:
     //helpers
     void gen();
     void bind();
@@ -48,7 +48,7 @@ private:
     GLuint vao;
     GLuint vbo;
     GLuint ibo;
-    std::shared_ptr<Shader> mat;
+    std::shared_ptr<Shader> mtl;
 };
 
 #endif //MESH_H

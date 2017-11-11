@@ -5,8 +5,6 @@
 
 using namespace std;
 
-
-
 Mesh::Mesh(const vector<Vertex>& verts,
         const vector<GLuint>& idxs,
         const vector<Texture>& texs)
@@ -81,21 +79,21 @@ void Mesh::bind_textures() {
         Texmap t = textures[i].type;
         uint idx = static_cast<uint>(t);
         uint count = ++map_count[idx];
-        mat->set("material." + texmap_to_string(t) + to_string(count), i);
+        mtl->set("material." + texmap_to_string(t) + to_string(count), i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::set_material(shared_ptr<Shader> material) {
-    mat = material;
+    mtl = material;
     glBindVertexArray(vao);
     bind_textures();
     glBindVertexArray(0);
 }
 
 void Mesh::draw() {
-    mat->use();
+    mtl->use();
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, static_cast<int>(indices.size()), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);

@@ -7,7 +7,7 @@
 #include <memory>
 #include "Camera.h"
 #include "Shader.h"
-#include "Mesh.h"
+#include "CubeMesh.h"
 #include "io.h"
 
 using namespace std;
@@ -52,21 +52,11 @@ GLuint create_tex(std::string path) {
 void draw_init(glm::vec<2, int> dims) {
     string pwd(PROJECT_SRC_DIR);
 
-    vector<Vertex> vertices = {
-        {glm::vec3(.5f, .5f, .0f), glm::vec3(0, 0, 1), glm::vec2(1, 1)},
-        {glm::vec3(.5f,-.5f, .0f), glm::vec3(0, 0, 1), glm::vec2(1, 0)},
-        {glm::vec3(-.5f,.5f, .0f), glm::vec3(0, 0, 1), glm::vec2(0, 1)},
-        {glm::vec3(-.5f,-.5f,.0f), glm::vec3(0, 0, 1), glm::vec2(0, 0)}
-    };
-    vector<GLuint> indices = {
-        0, 1, 2,
-        1, 2, 3
-    };
     vector<Texture> textures = {
         {create_tex(pwd + "/res/container2.png"), Texmap::diffuse}
     };
 
-    tri = shared_ptr<Mesh>(new Mesh(vertices, indices, textures));
+    tri = shared_ptr<Mesh>(new CubeMesh(textures));
     tricolor = shared_ptr<Shader>(new Shader());
 
     //build material
@@ -85,12 +75,14 @@ void draw_init(glm::vec<2, int> dims) {
     //TODO: Uniform buffer object; see below
     //apply projection
     cam->apply_proj(*tricolor);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 }
 
 void draw() {
     glClearColor(.2f, .2f, .2f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //TODO:
     //update camera view: note to self, the most efficient way to do this across
     // many shaders (i.e. materials) is to use Uniform Buffer Objects:
