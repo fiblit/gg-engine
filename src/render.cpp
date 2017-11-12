@@ -8,12 +8,17 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "CubeMesh.h"
+#include "PointLight.h"
+#include "DirLight.h"
+#include "SpotLight.h"
 #include "io.h"
 
 using namespace std;
 
 shared_ptr<Shader> tricolor;
-shared_ptr<Shader> littri;
+unique_ptr<DirLight> dir_light;
+unique_ptr<PointLight> point_light;
+unique_ptr<SpotLight> spot_light;
 shared_ptr<Mesh> tri;
 unique_ptr<Camera> cam;
 
@@ -24,7 +29,7 @@ GLuint create_tex(std::string path) {
         return 0;
     }
 
-	GLenum format = GL_RGB;
+    GLenum format = GL_RGB;
     if (img->channels == 1) {
         format = GL_RED;
     } else if (img->channels == 3) {
@@ -37,11 +42,11 @@ GLuint create_tex(std::string path) {
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(format),
-	    img->width, img->height, 0,
+        img->width, img->height, 0,
         format, GL_UNSIGNED_BYTE, img->bytes);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -54,22 +59,27 @@ void draw_init(glm::vec<2, int> dims) {
     string pwd(PROJECT_SRC_DIR);
 
     vector<Texture> textures = {
-        {create_tex(pwd + "/res/container2.png"), Texmap::diffuse}
+        {create_tex(pwd + "/res/container2.png"), Texmap::diffuse},
+        {create_tex(pwd + "/res/container2_specular.png"), Texmap::specular}
     };
 
     tri = shared_ptr<Mesh>(new CubeMesh(textures));
-    littri = shared_ptr<Shader>(new Shader());
     tricolor = shared_ptr<Shader>(new Shader());
 
     //build material
     tricolor->add(GL_VERTEX_SHADER, pwd + "/res/glsl/tex.vert");
-    tricolor->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/tex.frag");
+    tricolor->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/lit_mtl.frag");
     tricolor->build();
-    tri->set_material(tricolor);
+    tri->set_material(tricolor, 1.0f);
 
-    littri->add(GL_VERTEX_SHADER, pwd + "/res/glsl/tex.vert");
-    littri->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/lit_mtl.frag");
-    littri->build();
+    //test lighting
+    dir_light = unique_ptr<DirLight>(new DirLight());
+    dir_light->dir(glm::vec3(-1, -0, -1));
+    dir_light->ambient(glm::vec3(.1, .1, .1));
+    dir_light->diffuse(glm::vec3(1., 1., 1.));
+    dir_light->specular(glm::vec3(1., 1., 1.));
+    dir_light->pass_to(*tricolor, "dir_lights[0].");
+    tricolor->set("n_dir_lights", 1);
 
     //set up camera
     cam = make_unique<Camera>();

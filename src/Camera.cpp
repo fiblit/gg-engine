@@ -6,7 +6,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #undef GLM_ENABLE_EXPERIMENTAL
-#include <iostream>
 
 Camera::Camera()
     : _view(new Transform(nullptr)), _proj(glm::mat4()), _dirty(false)

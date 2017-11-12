@@ -33,8 +33,8 @@ struct SpotLight {
     vec3 dir;
 
     //cutoffs for brightness (100%, 0%)
-    float cutoff_100per;
-    float cutoff_0per;
+    float cutoff_100p;
+    float cutoff_0p;
 
     PointLight point_light;
 };
@@ -50,8 +50,11 @@ uniform Material material;
 
 //TODO: variable size of lights?
 #define LIGHT_LIMIT 8
+uniform int n_dir_lights = 0;
 uniform DirLight dir_lights[LIGHT_LIMIT];
+uniform int n_point_lights = 0;
 uniform PointLight point_lights[LIGHT_LIMIT];
+uniform int n_spot_lights = 0;
 uniform SpotLight spot_lights[LIGHT_LIMIT];
 
 vec3 shade_blinn_phong(vec3 to_L, vec3 norm, vec3 view_dir,
@@ -61,8 +64,7 @@ vec3 shade_PointLight(PointLight pl, vec3 norm, vec3 view_dir, Color unlit);
 vec3 shade_SpotLight(SpotLight sl, vec3 norm, vec3 view_dir, Color unlit);
 
 void main() {
-    //vec3 norm = normalize(fnorm);
-    vec3 norm = fnorm;
+    vec3 norm = normalize(fnorm);
     vec3 view_dir = normalize(view[3].xyz - fpos);
 
     Color unlit;
@@ -71,12 +73,13 @@ void main() {
     unlit.specular = vec3(texture(material.specular1, ftex));
 
     vec3 color = vec3(0, 0, 0);
-    for (int i = 0; i < LIGHT_LIMIT; ++i) {
-        //technically overworking itself, however, only black will be added for
-        //null lights....
-        //it is just best to not use so many lights for forward rendering
+    for (int i = 0; i < n_dir_lights; ++i) {
         color += shade_DirLight(dir_lights[i], norm, view_dir, unlit);
+    }
+    for (int i = 0; i < n_point_lights; ++i) {
         color += shade_PointLight(point_lights[i], norm, view_dir, unlit);
+    }
+    for (int i = 0; i < n_spot_lights; ++i) {
         color += shade_SpotLight(spot_lights[i], norm, view_dir, unlit);
     }
 
@@ -87,12 +90,13 @@ vec3 shade_blinn_phong(vec3 to_L, vec3 norm, vec3 view_dir, Color unlit,
         Color light) {
     float diffuse = max(0.0, dot(norm, to_L));
     vec3 half_dir = normalize(view_dir + to_L);
-    float specular = pow(max(0.0, dot(norm, half_dir)), material.shininess);
+    float specular = max(0.0, pow(max(0.0, dot(norm, half_dir)), 
+        material.shininess));
 
-    vec3 lit;
-    lit += unlit.ambient;
-    lit += diffuse * unlit.diffuse;
-    lit += specular * unlit.specular;
+    vec3 lit = vec3(0, 0, 0);
+    lit += light.ambient * unlit.ambient;
+    lit += light.diffuse * diffuse * unlit.diffuse;
+    lit += light.specular * specular * unlit.specular;
     return lit;
 }
 
@@ -120,8 +124,8 @@ vec3 shade_SpotLight(SpotLight sl, vec3 norm, vec3 view_dir, Color unlit) {
     //would prefer not to compute this twice
     vec3 to_L = normalize(sl.point_light.pos - fpos);
     float angle = dot(to_L, normalize(-sl.dir));
-    float ramp = sl.cutoff_100per - sl.cutoff_0per;
-    float fade = clamp((angle - sl.cutoff_0per) / ramp, 0.0, 1.0);
+    float ramp = sl.cutoff_100p - sl.cutoff_0p;
+    float fade = clamp((angle - sl.cutoff_0p) / ramp, 0.0, 1.0);
 
     return lit * fade;
 }
