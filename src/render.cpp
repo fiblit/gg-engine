@@ -13,6 +13,7 @@
 using namespace std;
 
 shared_ptr<Shader> tricolor;
+shared_ptr<Shader> littri;
 shared_ptr<Mesh> tri;
 unique_ptr<Camera> cam;
 
@@ -57,6 +58,7 @@ void draw_init(glm::vec<2, int> dims) {
     };
 
     tri = shared_ptr<Mesh>(new CubeMesh(textures));
+    littri = shared_ptr<Shader>(new Shader());
     tricolor = shared_ptr<Shader>(new Shader());
 
     //build material
@@ -64,6 +66,10 @@ void draw_init(glm::vec<2, int> dims) {
     tricolor->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/tex.frag");
     tricolor->build();
     tri->set_material(tricolor);
+
+    littri->add(GL_VERTEX_SHADER, pwd + "/res/glsl/tex.vert");
+    littri->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/lit_mtl.frag");
+    littri->build();
 
     //set up camera
     cam = make_unique<Camera>();
