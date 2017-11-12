@@ -93,8 +93,7 @@ vec3 shade_blinn_phong(vec3 to_L, vec3 norm, vec3 view_dir, Color unlit,
     float specular = max(0.0, pow(max(0.0, dot(norm, half_dir)), 
         material.shininess));
 
-    vec3 lit = vec3(0, 0, 0);
-    lit += light.ambient * unlit.ambient;
+    vec3 lit = light.ambient * unlit.ambient;
     lit += light.diffuse * diffuse * unlit.diffuse;
     lit += light.specular * specular * unlit.specular;
     return lit;
@@ -120,12 +119,11 @@ vec3 shade_PointLight(PointLight pl, vec3 norm, vec3 view_dir, Color unlit) {
 
 vec3 shade_SpotLight(SpotLight sl, vec3 norm, vec3 view_dir, Color unlit) {
     vec3 lit = shade_PointLight(sl.point_light, norm, view_dir, unlit);
-
     //would prefer not to compute this twice
     vec3 to_L = normalize(sl.point_light.pos - fpos);
     float angle = dot(to_L, normalize(-sl.dir));
     float ramp = sl.cutoff_100p - sl.cutoff_0p;
-    float fade = clamp((angle - sl.cutoff_0p) / ramp, 0.0, 1.0);
+    float fade = clamp((angle - sl.cutoff_0p)/(-ramp), 0.0, 1.0);
 
     return lit * fade;
 }

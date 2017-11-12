@@ -1,13 +1,15 @@
 #include "SpotLight.h"
 
+#include <glm/glm.hpp>
+
 SpotLight::SpotLight()
     : _dir(glm::vec3(0, 0, 1)), 
-    _cutoff_100p(.35f),//roughly 20->30 degrees
-    _cutoff_0p(.52f) {
+    _cutoff_100p(glm::cos(glm::radians(20.f))),
+    _cutoff_0p(glm::cos(glm::radians(30.f))) {
 }
 
 void SpotLight::pass_to(Shader& shader, const std::string& id) {
-    PointLight::pass_to(shader, id);
+    PointLight::pass_to(shader, id + "point_light.");
     shader.set(id + "dir", _dir);
     shader.set(id + "cutoff_100p", _cutoff_100p);
     shader.set(id + "cutoff_0p", _cutoff_0p);

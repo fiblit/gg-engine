@@ -73,20 +73,40 @@ void draw_init(glm::vec<2, int> dims) {
     tri->set_material(tricolor, 1.0f);
 
     //test lighting
+    tricolor->set("n_dir_lights", 1);
     dir_light = unique_ptr<DirLight>(new DirLight());
-    dir_light->dir(glm::vec3(-1, -0, -1));
+    dir_light->dir(glm::vec3(-.2, -1, -.1));
     dir_light->ambient(glm::vec3(.1, .1, .1));
-    dir_light->diffuse(glm::vec3(1., 1., 1.));
+    dir_light->diffuse(glm::vec3(.3, .3, .3));
     dir_light->specular(glm::vec3(1., 1., 1.));
     dir_light->pass_to(*tricolor, "dir_lights[0].");
-    tricolor->set("n_dir_lights", 1);
+
+    tricolor->set("n_point_lights", 1);
+    point_light = unique_ptr<PointLight>(new PointLight());
+    point_light->pos(glm::vec3(3, 0.6, 1));
+    point_light->att_to_dist(50.f);
+    point_light->ambient(glm::vec3(.01, .01, .01));
+    point_light->diffuse(glm::vec3(1., .5, .5));
+    point_light->specular(glm::vec3(1., 1., 1.));
+    point_light->pass_to(*tricolor, "point_lights[0]."); 
+
+    tricolor->set("n_spot_lights", 1);
+    spot_light = unique_ptr<SpotLight>(new SpotLight());
+    spot_light->dir(glm::vec3(-1, 0, 0));
+    spot_light->cutoff(glm::cos(glm::radians(10.f)), glm::cos(glm::radians(1.f)));
+    spot_light->pos(glm::vec3(-0.3, 0, 2));
+    spot_light->att_to_dist(100.f);
+    spot_light->ambient(glm::vec3(0, 0, 0));
+    spot_light->diffuse(glm::vec3(.1, .1, 3.));
+    spot_light->specular(glm::vec3(1., 1., 1.));
+    spot_light->pass_to(*tricolor, "spot_lights[0]."); 
 
     //set up camera
     cam = make_unique<Camera>();
     cam->set_aspect(static_cast<float>(dims.x / dims.y));
-    cam->set_pos(glm::vec3(5, 5, 5));
+    cam->set_pos(glm::vec3(4, 5, 6));
 
-    cam->set_rot(glm::vec3(-1, -1, -1), glm::vec3(0, 1, 0));
+    cam->set_rot(glm::vec3(-0.5, -1, -1), glm::vec3(0, 1, 0));
 
     //TODO: Uniform buffer object; see below
     //apply projection
@@ -106,7 +126,9 @@ void draw() {
     //is a good tutorial for them. Also, the Khronos standard seems pretty good.
     cam->apply_view(*tricolor);
 
-    tricolor->set("model", glm::mat4(1.f));// temporary.
+    glm::mat4 model = glm::mat4(3.f);
+    model[3][3] = 1.f;
+    tricolor->set("model", model);// temporary.
     //update models _and_ do glDraw; this combination seems to cause issues.
     tri->draw();
 }
