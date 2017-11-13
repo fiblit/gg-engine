@@ -2,9 +2,9 @@
 
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
-#include "io.h"
+#include "../io.h"
 
-#include "debug.h"
+#include "../util/debug.h"
 
 using namespace std;
 using namespace std::experimental;
