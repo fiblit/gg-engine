@@ -7,11 +7,11 @@
 #include <memory>
 #include <glm/gtc/quaternion.hpp>
 #include "Camera.h"
-#include "Shader.h"
-#include "CubeMesh.h"
-#include "PointLight.h"
-#include "DirLight.h"
-#include "SpotLight.h"
+#include "light/Shader.h"
+#include "light/PointLight.h"
+#include "light/DirLight.h"
+#include "light/SpotLight.h"
+#include "model/CubeMesh.h"
 #include "io.h"
 
 using namespace std;
@@ -99,7 +99,7 @@ void draw_init(glm::vec<2, int> dims) {
     spot_light->att_to_dist(100.f);
     spot_light->ambient(glm::vec3(0, 0, 0));
     spot_light->diffuse(glm::vec3(.1, .1, 1.));
-    spot_light->specular(glm::vec3(1., 1., 1.));
+    spot_light->specular(glm::vec3(.1, .1, 1.));
     spot_light->pass_to(*tricolor, "spot_lights[0]."); 
 
     //set up camera
@@ -181,10 +181,8 @@ void render_input_key(GLFWwindow* w, int* keys, float ds) {
 
 void render_input_cursor(GLFWwindow*, glm::vec2, glm::vec2 offset, float ) {
     offset *= 0.001f;//the sensitivity is weird :/
-    glm::vec3 yaw_right = cam->right();
-    yaw_right.y = 0;
     glm::vec3 look_new = cam->look_dir() +
-        + offset.x * yaw_right - offset.y * cam->up();
+        + offset.x * cam->right() - offset.y * cam->up();
     cam->set_rot(look_new, cam->up());
 }
 
