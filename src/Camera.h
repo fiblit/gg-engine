@@ -11,14 +11,15 @@ class Camera {
 public:
     Camera();
 
-    //set field of vision
-    void set_fov(float);
-    //set aspect ratio
-    void set_aspect(float);
-    //set near plane
-    void set_near(float);
-    //set far plane
-    void set_far(float);
+    //set/get
+    void fov(float);
+    float fov();
+    void aspect(float);
+    float aspect();
+    void near(float);
+    float near();
+    void far(float);
+    float far();
 
     //place the camera in its local frame
     void set_pos(glm::vec3);
@@ -27,12 +28,17 @@ public:
     //set orientation based on focus
     //void set_lookat(glm::vec3 lookat, glm::vec3 up);
 
+    glm::vec3 look_dir();
+    glm::vec3 up();
+    glm::vec3 right();
+
     //move the camera by vec3 in its local Transform
     void move(glm::vec3);
     //rotate the cameras viewing axis by quat. (alternate to setting)
     void rotate(glm::quat);
     //zoom in/out. 1 is default.
     void zoom(float z);
+    float zoom();
 
     // init materials to use projection
     void apply_proj(Shader& shader);
@@ -41,6 +47,9 @@ public:
 
 private:
     std::unique_ptr<Transform> _view;
+    glm::vec3 _pos;
+    glm::vec3 _look_dir;
+    glm::vec3 _up;
     glm::mat4 _proj;
     bool _dirty;
     const float _def_fov = 45.f;

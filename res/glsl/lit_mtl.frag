@@ -57,6 +57,8 @@ uniform PointLight point_lights[LIGHT_LIMIT];
 uniform int n_spot_lights = 0;
 uniform SpotLight spot_lights[LIGHT_LIMIT];
 
+uniform vec3 eye_pos;
+
 vec3 shade_blinn_phong(vec3 to_L, vec3 norm, vec3 view_dir,
     Color unlit, Color light);
 vec3 shade_DirLight(DirLight dl, vec3 norm, vec3 view_dir, Color unlit);
@@ -65,7 +67,7 @@ vec3 shade_SpotLight(SpotLight sl, vec3 norm, vec3 view_dir, Color unlit);
 
 void main() {
     vec3 norm = normalize(fnorm);
-    vec3 view_dir = normalize(view[3].xyz - fpos);
+    vec3 view_dir = normalize(eye_pos - fpos);
 
     Color unlit;
     unlit.ambient = vec3(texture(material.diffuse1, ftex));
@@ -93,7 +95,8 @@ vec3 shade_blinn_phong(vec3 to_L, vec3 norm, vec3 view_dir, Color unlit,
     float specular = max(0.0, pow(max(0.0, dot(norm, half_dir)), 
         material.shininess));
 
-    vec3 lit = light.ambient * unlit.ambient;
+    vec3 lit = vec3(0,0,0);
+    lit += light.ambient * unlit.ambient;
     lit += light.diffuse * diffuse * unlit.diffuse;
     lit += light.specular * specular * unlit.specular;
     return lit;
