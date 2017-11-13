@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <glm/gtc/quaternion.hpp>
 #include "Camera.h"
 #include "Shader.h"
 #include "CubeMesh.h"
@@ -70,7 +71,7 @@ void draw_init(glm::vec<2, int> dims) {
     tricolor->add(GL_VERTEX_SHADER, pwd + "/res/glsl/tex.vert");
     tricolor->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/lit_mtl.frag");
     tricolor->build();
-    tri->set_material(tricolor, 1.0f);
+    tri->set_material(tricolor, 4.0f);
 
     //test lighting
     tricolor->set("n_dir_lights", 1);
@@ -93,19 +94,18 @@ void draw_init(glm::vec<2, int> dims) {
     tricolor->set("n_spot_lights", 1);
     spot_light = unique_ptr<SpotLight>(new SpotLight());
     spot_light->dir(glm::vec3(-1, 0, 0));
-    spot_light->cutoff(glm::cos(glm::radians(10.f)), glm::cos(glm::radians(1.f)));
+    spot_light->cutoff(glm::cos(glm::radians(1.f)), glm::cos(glm::radians(1.f)));
     spot_light->pos(glm::vec3(-0.3, 0, 2));
     spot_light->att_to_dist(100.f);
     spot_light->ambient(glm::vec3(0, 0, 0));
-    spot_light->diffuse(glm::vec3(.1, .1, 3.));
+    spot_light->diffuse(glm::vec3(.1, .1, 1.));
     spot_light->specular(glm::vec3(1., 1., 1.));
     spot_light->pass_to(*tricolor, "spot_lights[0]."); 
 
     //set up camera
     cam = make_unique<Camera>();
-    cam->set_aspect(static_cast<float>(dims.x / dims.y));
+    cam->aspect(static_cast<float>(dims.x / dims.y));
     cam->set_pos(glm::vec3(4, 5, 6));
-
     cam->set_rot(glm::vec3(-0.5, -1, -1), glm::vec3(0, 1, 0));
 
     //TODO: Uniform buffer object; see below
@@ -119,6 +119,8 @@ void draw_init(glm::vec<2, int> dims) {
 void draw() {
     glClearColor(.2f, .2f, .2f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    cam->apply_proj(*tricolor);    
     //TODO:
     //update camera view: note to self, the most efficient way to do this across
     // many shaders (i.e. materials) is to use Uniform Buffer Objects:
@@ -131,4 +133,72 @@ void draw() {
     tricolor->set("model", model);// temporary.
     //update models _and_ do glDraw; this combination seems to cause issues.
     tri->draw();
+}
+
+//custom handler for input
+void render_input_key(GLFWwindow* w, int* keys, float ds) {
+    glm::vec3 motion(0, 0, 0);
+    if (keys[GLFW_KEY_W]) {
+        motion += glm::vec3(0, 0, 1);
+    }
+    if (keys[GLFW_KEY_D]) {
+        motion += glm::vec3(1, 0, 0);
+    }
+    if (keys[GLFW_KEY_R]) {
+        motion += glm::vec3(0, 1, 0);
+    }
+    if (keys[GLFW_KEY_S]) {
+        motion += glm::vec3(0, 0, -1);
+    }
+    if (keys[GLFW_KEY_A]) {
+        motion += glm::vec3(-1, 0, 0);
+    }
+    if (keys[GLFW_KEY_F]) {
+        motion += glm::vec3(0, -1, 0);
+    }
+    cam->move(motion * ds);
+
+    float roll = 0;
+    if (keys[GLFW_KEY_Q]) {
+        roll -= 1.0f;
+    }
+    if (keys[GLFW_KEY_E]) {
+        roll += 1.0f;
+    }
+    roll *= ds;
+    glm::vec3 up_new = cam->up() + roll * cam->right();
+    cam->set_rot(cam->look_dir(), up_new);
+
+    if (keys[GLFW_KEY_X] == 2) {
+        if (glfwGetInputMode(w, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+            glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        } else {
+            glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+    }
+    
+}
+
+void render_input_cursor(GLFWwindow*, glm::vec2, glm::vec2 offset, float ) {
+    offset *= 0.001f;//the sensitivity is weird :/
+    glm::vec3 yaw_right = cam->right();
+    yaw_right.y = 0;
+    glm::vec3 look_new = cam->look_dir() +
+        + offset.x * yaw_right - offset.y * cam->up();
+    cam->set_rot(look_new, cam->up());
+}
+
+void render_input_scroll(GLFWwindow*, glm::vec2 offset, float ds) {
+    cam->zoom(cam->zoom()*(1+offset.y*ds));
+}
+
+void framebuffer_resize(GLFWwindow* w, int width, int height) {
+    int old_width;
+    int old_height;
+    glfwGetWindowSize(w, &old_width, &old_height);
+    clog << "gg. Window resize (" << old_width << "," << old_height << ") -> "
+         << "(" << width << "," << height << ")\n";
+    glViewport(0, 0, width, height);
+
+    cam->aspect(static_cast<float>(width)/static_cast<float>(height));
 }

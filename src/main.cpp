@@ -11,12 +11,13 @@
 #include <iostream>
 #include <cstdlib>
 
+#include "Timer.h"
 #include "render.h"
+#include "io.h"
 
 using namespace std;
 
 void glfw_error(int err, const char* msg);
-void framebuffer_resize(GLFWwindow*, int width, int height);
 void monitor_connect(GLFWmonitor*, int event);
 void keymap_input(GLFWwindow*);
 
@@ -54,6 +55,7 @@ int main(int, char**) {
     const GLFWvidmode* mode0 = glfwGetVideoMode(monitors[0]);
     glfwSetMonitorCallback(monitor_connect);
 
+
     //initialize window and OpenGL context
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -80,17 +82,33 @@ int main(int, char**) {
 
     glViewport(0, 0, size.x, size.y);
 
+    input_callbacks(window);
+
     draw_init(size);
 
     //main loop
+    Timer init_time;
+    Timer frame_time;
+    int fps = 0;
+    auto last_s = init_time.time();
     while (!glfwWindowShouldClose(window)) {
+        frame_time.tick();
         draw();
 
         //double buffer
         glfwSwapBuffers(window);
         //input handling
         glfwPollEvents();   
-        keymap_input(window);
+        input_handler(window, frame_time.delta_s());
+
+        if (1 < std::chrono::duration_cast<std::chrono::seconds>(
+                frame_time.time() - last_s).count()) { 
+            std::clog << "FPS: " << fps << "\n";
+            fps = 0;
+            last_s = frame_time.time();
+        } else {
+            ++fps;
+        }
     }
 
     //free all memory and libraries
@@ -100,20 +118,6 @@ int main(int, char**) {
 
 void glfw_error(int err, const char* msg) {
     cerr << "gg! GLFW error: #" << err << " " << msg << "\n";
-}
-
-void keymap_input(GLFWwindow* w) {
-    if(glfwGetKey(w, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(w, true);
-}
-
-void framebuffer_resize(GLFWwindow* w, int width, int height) {
-    int old_width;
-    int old_height;
-    glfwGetWindowSize(w, &old_width, &old_height);
-    clog << "gg. Window resize (" << old_width << "," << old_height << ") -> "
-         << "(" << width << "," << height << ")\n";
-    glViewport(0, 0, width, height);
 }
 
 void monitor_connect(GLFWmonitor* m, int event) {

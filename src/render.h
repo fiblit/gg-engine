@@ -4,10 +4,17 @@
 #include <string>
 #include <glad.h>
 #include <glm/vec2.hpp>
+#include <GLFW/glfw3.h>
 
 GLuint create_tex(std::string path);
 //TODO: remove draw_init in favor of SceneGraphs
 void draw_init(glm::vec<2, int>);
 void draw();
+
+void framebuffer_resize(GLFWwindow* w, int width, int height);
+//input handler
+void render_input_key(GLFWwindow* w, int* key_map, float ds);
+void render_input_cursor(GLFWwindow* w, glm::vec2 pos, glm::vec2 d_pos, float ds);
+void render_input_scroll(GLFWwindow* w, glm::vec2 offset, float ds);
 
 #endif//RENDER_H
