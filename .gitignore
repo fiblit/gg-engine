@@ -1,5 +1,6 @@
 \.*
 !\.git*
+[Tt]emp/
 [Bb]uild/
 [Bb]in/
 [Oo]bj/
