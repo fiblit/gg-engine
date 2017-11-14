@@ -85,12 +85,16 @@ void Mesh::bind_textures() {
     glActiveTexture(GL_TEXTURE0);
 }
 
-void Mesh::set_material(shared_ptr<Shader> material, float shininess) {
+void Mesh::set_material(shared_ptr<Shader> material, float shininess,
+        glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular) {
     mtl = material;
     glBindVertexArray(vao);
     mtl->use();
     bind_textures();
     mtl->set("material.shininess", shininess);
+    mtl->set("material.color.ambient", ambient);
+    mtl->set("material.color.diffuse", diffuse);
+    mtl->set("material.color.specular", specular);
     glBindVertexArray(0);
 }
 

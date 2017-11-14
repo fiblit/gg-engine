@@ -12,6 +12,7 @@
 #include "DirLight.h"
 #include "SpotLight.h"
 #include "io.h"
+#include <glm/gtc/matrix_access.hpp>
 
 using namespace std;
 
@@ -19,7 +20,7 @@ shared_ptr<Shader> tricolor;
 unique_ptr<DirLight> dir_light;
 unique_ptr<PointLight> point_light;
 unique_ptr<SpotLight> spot_light;
-shared_ptr<Mesh> tri;
+vector<shared_ptr<Mesh>> tri;
 unique_ptr<Camera> cam;
 
 GLuint create_tex(std::string path) {
@@ -63,14 +64,25 @@ void draw_init(glm::vec<2, int> dims) {
         {create_tex(pwd + "/res/container2_specular.png"), Texmap::specular}
     };
 
-    tri = shared_ptr<Mesh>(new CubeMesh(textures));
+    tri.resize(4);
+    for (size_t i = 0; i < 4; ++i) {
+        tri[i] = shared_ptr<Mesh>(new CubeMesh(textures));
+    }
     tricolor = shared_ptr<Shader>(new Shader());
 
     //build material
     tricolor->add(GL_VERTEX_SHADER, pwd + "/res/glsl/tex.vert");
     tricolor->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/lit_mtl.frag");
     tricolor->build();
-    tri->set_material(tricolor, 1.0f);
+    for (size_t i = 0; i < 4; ++i) {
+        tri[i]->set_material(tricolor, 4.0f);
+        //tri[i]->material(Material(
+        //  shader,
+        //  {textures},
+        //  albedo reflections,
+        //  shininess,
+        //  other lit properties like metallicity and transparency.)
+    }
 
     //test lighting
     tricolor->set("n_dir_lights", 1);
@@ -126,9 +138,11 @@ void draw() {
     //is a good tutorial for them. Also, the Khronos standard seems pretty good.
     cam->apply_view(*tricolor);
 
-    glm::mat4 model = glm::mat4(3.f);
-    model[3][3] = 1.f;
-    tricolor->set("model", model);// temporary.
-    //update models _and_ do glDraw; this combination seems to cause issues.
-    tri->draw();
+    for (size_t i = 0; i < 4; ++i) {
+        glm::mat4 model = glm::mat4(1.f);
+        model = glm::column(model, 3, glm::vec4(2*i, i, 0, 1));
+        tricolor->set("model", model);// temporary.
+        //update models _and_ do glDraw; this combination seems to cause issues.
+        tri[i]->draw();
+    }
 }

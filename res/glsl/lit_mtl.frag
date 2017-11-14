@@ -6,8 +6,12 @@ struct Color {
 };
 
 struct Material {
+    //albedo
+    Color color;
+    //texture
     sampler2D diffuse1;
     sampler2D specular1;
+    //properties (e.g. anisotropy/metallicity) Just Specular now.
     float shininess;
 };
 
@@ -57,6 +61,9 @@ uniform PointLight point_lights[LIGHT_LIMIT];
 uniform int n_spot_lights = 0;
 uniform SpotLight spot_lights[LIGHT_LIMIT];
 
+uniform vec3 eye_pos;
+
+Color albedo(Material mtl);
 vec3 shade_blinn_phong(vec3 to_L, vec3 norm, vec3 view_dir,
     Color unlit, Color light);
 vec3 shade_DirLight(DirLight dl, vec3 norm, vec3 view_dir, Color unlit);
@@ -67,10 +74,7 @@ void main() {
     vec3 norm = normalize(fnorm);
     vec3 view_dir = normalize(view[3].xyz - fpos);
 
-    Color unlit;
-    unlit.ambient = vec3(texture(material.diffuse1, ftex));
-    unlit.diffuse = vec3(texture(material.diffuse1, ftex));
-    unlit.specular = vec3(texture(material.specular1, ftex));
+    Color unlit = albedo(material);
 
     vec3 color = vec3(0, 0, 0);
     for (int i = 0; i < n_dir_lights; ++i) {
@@ -84,6 +88,14 @@ void main() {
     }
 
     ocolor = vec4(color, 1.0);
+}
+
+Color albedo(Material mtl) {
+    Color a;
+    a.ambient = mtl.color.ambient + vec3(texture(mtl.diffuse1, ftex));
+    a.diffuse = mtl.color.diffuse + vec3(texture(mtl.diffuse1, ftex));
+    a.specular = mtl.color.specular + vec3(texture(mtl.specular1, ftex));
+    return a;
 }
 
 vec3 shade_blinn_phong(vec3 to_L, vec3 norm, vec3 view_dir, Color unlit,
