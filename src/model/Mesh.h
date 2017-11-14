@@ -29,7 +29,10 @@ public:
     Mesh(const std::vector<Vertex>& vertices,
         const std::vector<GLuint>& indices,
         const std::vector<Texture>& textures);
-    void set_material(std::shared_ptr<Shader> material, float shininess);
+    void set_material(std::shared_ptr<Shader> material, float shininess,
+        glm::vec3 ambient = glm::vec3(0),
+        glm::vec3 diffuse = glm::vec3(0),
+        glm::vec3 specular = glm::vec3(0));
     void draw();
 protected:
     //helpers
