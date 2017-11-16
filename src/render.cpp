@@ -104,12 +104,12 @@ void draw_init(glm::vec<2, int> dims) {
 
     tricolor->set("n_spot_lights", 1);
     spot_light = unique_ptr<SpotLight>(new SpotLight());
-    spot_light->dir(glm::vec3(-1, 0, 0));
-    spot_light->cutoff(glm::cos(glm::radians(10.f)), glm::cos(glm::radians(1.f)));
-    spot_light->pos(glm::vec3(-0.3, 0, 2));
+    spot_light->dir(glm::vec3(0, 0, -1));
+    spot_light->cutoff(glm::cos(glm::radians(35.f)), glm::cos(glm::radians(20.f)));
+    spot_light->pos(glm::vec3(0, 0, 1));
     spot_light->att_to_dist(100.f);
     spot_light->ambient(glm::vec3(0, 0, 0));
-    spot_light->diffuse(glm::vec3(.1, .1, 3.));
+    spot_light->diffuse(glm::vec3(.1, .1, 1.));
     spot_light->specular(glm::vec3(1., 1., 1.));
     spot_light->pass_to(*tricolor, "spot_lights[0]."); 
 

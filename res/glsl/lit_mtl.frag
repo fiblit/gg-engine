@@ -135,7 +135,7 @@ vec3 shade_SpotLight(SpotLight sl, vec3 norm, vec3 view_dir, Color unlit) {
     vec3 to_L = normalize(sl.point_light.pos - fpos);
     float angle = dot(to_L, normalize(-sl.dir));
     float ramp = sl.cutoff_100p - sl.cutoff_0p;
-    float fade = clamp((angle - sl.cutoff_0p)/(-ramp), 0.0, 1.0);
+    float fade = clamp((angle - sl.cutoff_0p)/(ramp), 0.0, 1.0);
 
     return lit * fade;
 }
