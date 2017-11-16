@@ -1,3 +1,6 @@
+#ifndef TRANSFORM_H
+#define TRANSFORM_H
+
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
@@ -56,3 +59,5 @@ private:
     //node/thing which is being transformed
     //std::shared_ptr<T> socket;
 };
+
+#endif//TRANSFORM_H

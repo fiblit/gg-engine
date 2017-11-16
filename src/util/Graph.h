@@ -7,6 +7,7 @@
 #include <unordered_set>
 
 typedef unsigned int NodeId;
+typedef std::unordered_set<NodeId> Nodes;
 
 template <class T>
 class Graph {
@@ -14,17 +15,18 @@ public:
     Graph();
 
     NodeId add_vertex(const T& v);
+    void del_vertex(const NodeId& v);
     void add_dir_edge(const NodeId& v, const NodeId& u);
     void add_edge(const NodeId& v, const NodeId& u);
 
-    std::unordered_set<NodeId>& edges(const NodeId& v);
+    Nodes& edges(const NodeId& v);
     std::experimental::optional<T> data(const NodeId& v);
 
     void for_vertex(std::function<void(NodeId)> f);
     void for_edge(std::function<void(NodeId, NodeId)> f);
 private:
     std::unordered_map<NodeId, T> _vertices;
-    std::unordered_map<NodeId, std::unordered_set<NodeId>> _edges;
+    std::unordered_map<NodeId, Nodes> _edges;
     NodeId _idx_counter;
 };
 
@@ -36,6 +38,16 @@ template <class T>
 inline NodeId Graph<T>::add_vertex(const T& v) {
     _vertices[_idx_counter] = v;
     return _idx_counter++;
+}
+
+template <class T>
+inline void Graph<T>::del_vertex(const NodeId& v) {
+    _vertices.erase(v);
+
+    for (NodeId adj : edges(v)) {
+        _edges[adj].erase(v);
+    }
+    _edges.erase(v);
 }
 
 template <class T>
@@ -51,11 +63,11 @@ inline void Graph<T>::add_edge(const NodeId& v, const NodeId& u) {
 }
 
 template <class T>
-inline std::unordered_set<NodeId>& Graph<T>::edges(const NodeId& v) {
+inline Nodes& Graph<T>::edges(const NodeId& v) {
     if (_edges.count(v)) {
         return _edges[v];
     } else {
-        return {};
+        return *(new Nodes());
     }//return _edges.count(v) ? _edges[const_cast<NodeId>(v)] : {};
 }
 

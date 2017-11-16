@@ -13,8 +13,8 @@ void draw();
 
 void framebuffer_resize(GLFWwindow* w, int width, int height);
 //input handler
-void render_input_key(GLFWwindow* w, int* key_map, float ds);
-void render_input_cursor(GLFWwindow* w, glm::vec2 pos, glm::vec2 d_pos, float ds);
-void render_input_scroll(GLFWwindow* w, glm::vec2 offset, float ds);
+void render_input_key(GLFWwindow* w, double dt);
+void render_input_cursor(GLFWwindow* w, double dt);
+void render_input_scroll(GLFWwindow* w, double dt);
 
 #endif//RENDER_H

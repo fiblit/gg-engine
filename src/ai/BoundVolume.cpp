@@ -1,36 +1,37 @@
-#include "BoundVolume.h"
+﻿#include "BoundVolume.h"
 
-using namespace std;
+Rect::Rect() 
+    : BoundVolume(glm::vec2(0, 0), volume_type::RECT), _w(0), _h(0) {}
+Rect::Rect(glm::vec2 o, float w, float h)
+    : BoundVolume(o, volume_type::RECT), _w(w), _h(h) {}
 
-BoundVolume::BoundVolume() {}
-BoundVolume::BoundVolume(glm::vec2 o) : _o(o) {}
+Circ::Circ() 
+    : BoundVolume(glm::vec2(0, 0), volume_type::CIRC), _r(0) {}
+Circ::Circ(glm::vec2 o, float r) 
+    : BoundVolume(o, volume_type::CIRC), _r(r) {}
 
-Rect::Rect() {}
-Rect::Rect(glm::vec2 o, float w, float h) : BoundVolume(o), _h(h), _w(w) {}
+BoundVolume::~BoundVolume() {}
+BoundVolume::BoundVolume() : _o(glm::vec2(0, 0)), _vt(volume_type::CIRC) {}
+BoundVolume::BoundVolume(glm::vec2 o, volume_type vt) : _o(o), _vt(vt) {}
 
-Circ::Circ() {}
-Circ::Circ(glm::vec2 o, float r) : BoundVolume(o),_r(r) {}
-
-vector<BoundVolume *> Circ::minkowski_sum(BoundVolume* bv) {
-    //I wish there was a way I didn't have to check the types..
-    Circ* c = dynamic_cast<Circ*>(bv);
-    if (c != nullptr) {
-        return minkowski_sum_(c);
+//TODO: rect/circ collision could be simplified via:
+//test if point p is in rect such that p is r along the direction from circle to rect
+//note: "along the direction" is not as simple as it sounds, probably not simpler
+std::vector<BoundVolume*> Circ::minkowski_sum(BoundVolume* bv) {
+    if (_vt == volume_type::CIRC) {
+        return minkowski_sum_(dynamic_cast<Circ*>(bv));
     }
-    
-    Rect * r = dynamic_cast<Rect*>(bv);
-    if (r != nullptr) {
-        return minkowski_sum_(r);
+    if (_vt == volume_type::RECT) {
+        return minkowski_sum_(dynamic_cast<Rect*>(bv));
     }
-
-    return vector<BoundVolume*>();
+    return std::vector<BoundVolume*>();
 }
-vector<BoundVolume*> Circ::minkowski_sum_(Circ* b) {
-    vector<BoundVolume*> bv = {new Circ(b->_o, _r + b->_r)};
+std::vector<BoundVolume*> Circ::minkowski_sum_(Circ* b) {
+    std::vector<BoundVolume*> bv = {new Circ(b->_o, _r + b->_r)};
     return bv;
 }
-vector<BoundVolume*> Circ::minkowski_sum_(Rect* b) {
-    vector<BoundVolume*> bv = {
+std::vector<BoundVolume*> Circ::minkowski_sum_(Rect* b) {
+    std::vector<BoundVolume*> bv = {
         new Rect(b->_o, b->_w, 2 * _r + b->_h),
         new Rect(b->_o, 2 * _r + b->_w, b->_h),
         new Circ(glm::vec2(b->_o.x + b->_w / 2, b->_o.y + b->_h / 2), _r),
@@ -41,28 +42,24 @@ vector<BoundVolume*> Circ::minkowski_sum_(Rect* b) {
     return bv;
 }
 
-vector<BoundVolume*> Rect::minkowski_sum(BoundVolume* bv) {
-    Circ* c = dynamic_cast<Circ*>(bv);
-    if (c != nullptr) {
-        return minkowski_sum_(c);
+std::vector<BoundVolume*> Rect::minkowski_sum(BoundVolume* bv) {
+    if (_vt == volume_type::CIRC) {
+        return minkowski_sum_(dynamic_cast<Circ*>(bv));
     }
-
-    Rect * r = dynamic_cast<Rect*>(bv);
-    if (r != nullptr) {
-        return minkowski_sum_(r);
+    if (_vt == volume_type::RECT) {
+        return minkowski_sum_(dynamic_cast<Rect*>(bv));
     }
-
-    return vector<BoundVolume*>();
+    return std::vector<BoundVolume*>();
 }
-vector<BoundVolume*> Rect::minkowski_sum_(Rect* b) {
-    vector<BoundVolume*> bv = {new Rect(b->_o, _w + b->_w, _h + b->_h)};
+
+std::vector<BoundVolume*> Rect::minkowski_sum_(Rect* b) {
+    std::vector<BoundVolume*> bv = {new Rect(b->_o, _w + b->_w, _h + b->_h)};
     return bv;
 }
-
-vector<BoundVolume*> Rect::minkowski_sum_(Circ * b) {
-    vector<BoundVolume*> bv = {
+std::vector<BoundVolume*> Rect::minkowski_sum_(Circ* b) {
+    std::vector<BoundVolume*> bv = {
         new Rect(b->_o, _w, 2 * b->_r + _h),
-        new Rect(b->_o, 2 * b->_r + _w, _h),
+        new Rect(b->_o, 2 *b->_r + _w, _h),
         new Circ(glm::vec2(b->_o.x + _w / 2, b->_o.y + _h / 2), b->_r),
         new Circ(glm::vec2(b->_o.x - _w / 2, b->_o.y + _h / 2), b->_r),
         new Circ(glm::vec2(b->_o.x + _w / 2, b->_o.y - _h / 2), b->_r),
@@ -70,7 +67,6 @@ vector<BoundVolume*> Rect::minkowski_sum_(Circ * b) {
     };
     return bv;
 }
-
 
 bool Circ::collides(glm::vec2 p) {
     glm::vec2 diff = p - _o;
@@ -84,7 +80,7 @@ bool Circ::line_of_sight(glm::vec2 a, glm::vec2 b, glm::vec2 Lab, float len2) {
         return false; // HIT
 
     glm::vec2 Lao = _o - a;
-    //we don't use isCollision because we use a lot of these values again
+    //we don't use is_collision because we use a lot of these values again
     if (glm::dot(Lao, Lao) <= r2) //point a inside circle
         return false; // HIT
 
@@ -101,12 +97,36 @@ bool Circ::line_of_sight(glm::vec2 a, glm::vec2 b, glm::vec2 Lab, float len2) {
     return true; // else MISS
 }
 
-bool Rect::collides(glm::vec2 p) {
-    return abs(p.x - _o.x) <= _w / 2
-        && abs(p.y - _o.y) <= _h / 2;
+float Circ::intersect(glm::vec2 bo, glm::vec2 v) {
+    //min t = - (u.v) +- sqrt((u.v)^. - (v.v) (u.u - r^))/(v.v)
+    glm::vec2 u = bo - _o;
+    float c = glm::dot(u, u) - _r * _r;
+    if (c < 0)//inside 
+        return 0;
+
+    float b = glm::dot(u, v);
+    float a = glm::dot(v, v);
+
+    float d = b*b - a*c;
+    if (d <= 0)//no intersect, forward or backwards
+        return std::numeric_limits<float>::max();
+
+    float t = (-b - static_cast<float>(sqrt(d))) / a;
+    if (t < 0)//intersction is behind ray
+        return std::numeric_limits<float>::max();
+
+    return t;
 }
 
-bool Rect::line_of_sight(glm::vec2 a, glm::vec2 b, glm::vec2, float) {
+bool Rect::collides(glm::vec2 p) {
+    return fabs(p.x - _o.x) <= _w / 2
+        && fabs(p.y - _o.y) <= _h / 2;
+}
+
+bool Rect::line_of_sight(glm::vec2 a, glm::vec2 b, glm::vec2 /*Lab*/, float /*len2*/) {
+    //float t = intersect(b, Lab/sqrt(len2));//the intersect for axis aligned is actually pretty fast
+    //return t*t > len2;
+
     float left = _o.x - _w / 2;
     float right = _o.x + _w / 2;
     float top = _o.y + _h / 2;
@@ -119,7 +139,8 @@ bool Rect::line_of_sight(glm::vec2 a, glm::vec2 b, glm::vec2, float) {
 }
 
 //TODO: fix, so I can rotate rects
-bool Rect::lines_collide(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4) {
+//deprecated
+bool Rect::line_segs_collide(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4) {
     glm::vec2 pp[4] = { p1, p2, p3, p4 };
     glm::vec3 l[2], p[4], x;
 
@@ -148,24 +169,137 @@ bool Rect::lines_collide(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4)
 
     return true;//must have hit
 }
-
-bool Rect::line_axial_line_collide(glm::vec2 pp1, glm::vec2 pp2, 
-        float val, int axis, float oValLo, float oValHi) {
+bool Rect::line_axial_line_collide(glm::vec2 pp1, glm::vec2 pp2, float val,
+        int axis, float oValLo, float oValHi) {
     glm::vec3 l = glm::cross(glm::vec3(pp1, 1), glm::vec3(pp2, 1));
-    //ax+by+c = 0
+    //ax+by+circ = 0
 
     //vertical
     if (axis == 0) {// (1/val)*x + 0*y - 1 = 0 // x = val
         float yint = (-l[0] * val - l[2]) / l[1];
         //val line hits lineseg
         return ((pp1.x <= val && val <= pp2.x) || (pp2.x <= val && val <= pp1.x))
-            && (oValLo <= yint && yint <= oValHi); //intersection on axial segment
+            //intersection on axial segment
+            && (oValLo <= yint && yint <= oValHi);
     }
     //horizontal
     else {//if (axis == 1) {// 0x + (1/val)*y - 1 = 0 // y =val
         float xint = (-l[1] * val - l[2]) / l[0];
-        //axis line hits lineseg
+        //axial line hits line seg
         return ((pp1.y <= val && val <= pp2.y) || (pp2.y <= val && val <= pp1.y))
-            && (oValLo <= xint && xint <= oValHi); //intersection on axial segment
+            //intersection on axial segment
+            && (oValLo <= xint && xint <= oValHi);
     }
+}
+
+static float ray_axial_line_intersect(glm::vec2 po, glm::vec2 pv, float val,
+        int axis, float oValLo, float oValHi){
+    //https://rootllama.wordpress.com/2014/06/20/ray-line-segment-intersection-test-in-2d/
+    glm::vec2 q, s;
+    if (axis == 0) {//vert 
+        q = glm::vec2(val, oValLo);
+        s = glm::vec2(0, oValHi - oValLo);
+    }
+    else {
+        q = glm::vec2(oValLo, val);
+        s = glm::vec2(oValHi - oValLo, 0);
+    }
+    glm::vec2 v1 = po - q;
+    glm::vec2 v2 = s - q;
+    glm::vec2 v3(-pv.y, pv.x);
+    float dot = glm::dot(v2, v3);
+    if (fabs(dot) > 0) {
+        float t1 = (v2.x * v1.y - v2.y * v1.x) / dot;
+        float t2 = glm::dot(v1, v3) / dot;
+        if (t1 >= 0 && 0 <= t2 && t2 <= 1)
+            return t1;
+        else
+            return std::numeric_limits<float>::max();
+    }
+    else
+        return std::numeric_limits<float>::max();
+
+
+    //http://stackoverflow.com/questions/14307158/ ...
+    //how-do-you-check-for-intersection-between-a-line-segment-and-a-line-ray-emanatin
+    //http://stackoverflow.com/questions/563198/ ...
+    //how-do-you-detect-where-two-line-segments-intersect/565282#565282
+    /*glm::vec2 p = po;
+    glm::vec2 r = pv;
+    //v x w = vx wy − vy wx
+    //t = (q − p) × s / (r × s)
+    //u = (q − p) × r / (r × s)
+    glm::vec2 qp = q - p;
+    float rxs = r.x * s.y - r.y * s.x;
+    float qpxs = qp.x * s.y - qp.y * s.x;
+    float qpxr = qp.x * r.y - qp.y * r.x;
+    float e = 0.0000001;
+    if (abs(rxs) < e) {
+        return std::numeric_limits<float>::max();
+    }
+    else {
+        float t = qpxs / rxs;
+        float u = qpxr / rxs;
+        if (0 <= t && 0 <= u && u <= 1)
+            return t;
+        else
+            return std::numeric_limits<float>::max();
+    }*/
+}
+
+//assumes axis alignment
+float Rect::intersect(glm::vec2 bo, glm::vec2 v) {
+    if (collides(bo))
+        return 0;
+    
+    float left = _o.x - _w / 2;
+    float right = _o.x + _w / 2;
+    float top = _o.y + _h / 2;
+    float bottom = _o.y - _h / 2;
+
+    float t = std::numeric_limits<float>::max();
+    float possible = ray_axial_line_intersect(bo, v, left, 0, bottom, top);
+    if (possible < t) t = possible;
+    possible = ray_axial_line_intersect(bo, v, right, 0, bottom, top);
+    if (possible < t) t = possible;
+    possible = ray_axial_line_intersect(bo, v, bottom, 1, left, right);
+    if (possible < t) t = possible;
+    possible = ray_axial_line_intersect(bo, v, top, 1, left, right);
+    if (possible < t) t = possible;
+
+    return t;
+    /*
+    glm::vec2 d_o = bo - _o;
+
+    float t_x_hi = (_w - d_o.x) / v.x;
+    float t_y_hi = (_h - d_o.y) / v.y;
+
+    float t_x_lo = (-_w - d_o.x) / v.x;
+    float t_y_lo = (-_h - d_o.y) / v.y;
+
+    if (t_x_hi > t_x_lo) {
+        float t = t_x_hi;
+        t_x_hi = t_x_lo;
+        t_x_lo = t_x_hi;
+    }
+    if (t_y_hi > t_y_lo) {
+        float t = t_y_hi;
+        t_y_hi = t_y_lo;
+        t_y_lo = t_y_hi;
+    }
+
+    //no intersection forward or back
+    if (t_x_hi < t_y_lo || t_x_lo > t_y_hi)
+        return std::numeric_limits<float>::max();
+    else {
+        float t_lo = (t_x_lo > t_y_lo ? t_x_lo : t_y_lo);
+        float t_hi = (t_x_hi > t_y_hi ? t_x_hi : t_y_hi);
+        if (t_hi < 0)//intersection before ray
+            return std::numeric_limits<float>::max();
+        else if (t_lo < 0)
+            return 0; //intersection current
+        else
+            return t_lo;
+    }
+    */
 }

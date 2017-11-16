@@ -13,6 +13,7 @@
 #include "light/SpotLight.h"
 #include "model/CubeMesh.h"
 #include "io.h"
+#include "ui.h"
 
 using namespace std;
 
@@ -57,6 +58,10 @@ GLuint create_tex(std::string path) {
 }
 
 void draw_init(glm::vec<2, int> dims) {
+    ui::add_handler(render_input_key);
+    ui::add_handler(render_input_cursor);
+    ui::add_handler(render_input_scroll);
+
     string pwd(PROJECT_SRC_DIR);
 
     vector<Texture> textures = {
@@ -136,40 +141,41 @@ void draw() {
 }
 
 //custom handler for input
-void render_input_key(GLFWwindow* w, int* keys, float ds) {
+void render_input_key(GLFWwindow* w, double ddt) {
+    float dt = static_cast<float>(ddt);
     glm::vec3 motion(0, 0, 0);
-    if (keys[GLFW_KEY_W]) {
+    if (ui::key_map[GLFW_KEY_W]) {
         motion += glm::vec3(0, 0, 1);
     }
-    if (keys[GLFW_KEY_D]) {
+    if (ui::key_map[GLFW_KEY_D]) {
         motion += glm::vec3(1, 0, 0);
     }
-    if (keys[GLFW_KEY_R]) {
+    if (ui::key_map[GLFW_KEY_R]) {
         motion += glm::vec3(0, 1, 0);
     }
-    if (keys[GLFW_KEY_S]) {
+    if (ui::key_map[GLFW_KEY_S]) {
         motion += glm::vec3(0, 0, -1);
     }
-    if (keys[GLFW_KEY_A]) {
+    if (ui::key_map[GLFW_KEY_A]) {
         motion += glm::vec3(-1, 0, 0);
     }
-    if (keys[GLFW_KEY_F]) {
+    if (ui::key_map[GLFW_KEY_F]) {
         motion += glm::vec3(0, -1, 0);
     }
-    cam->move(motion * ds);
+    cam->move(motion * dt);
 
     float roll = 0;
-    if (keys[GLFW_KEY_Q]) {
+    if (ui::key_map[GLFW_KEY_Q]) {
         roll -= 1.0f;
     }
-    if (keys[GLFW_KEY_E]) {
+    if (ui::key_map[GLFW_KEY_E]) {
         roll += 1.0f;
     }
-    roll *= ds;
+    roll *= dt;
     glm::vec3 up_new = cam->up() + roll * cam->right();
     cam->set_rot(cam->look_dir(), up_new);
 
-    if (keys[GLFW_KEY_X] == 2) {
+    if (ui::edge_up(GLFW_KEY_X)) {
         if (glfwGetInputMode(w, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
             glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         } else {
@@ -179,15 +185,17 @@ void render_input_key(GLFWwindow* w, int* keys, float ds) {
     
 }
 
-void render_input_cursor(GLFWwindow*, glm::vec2, glm::vec2 offset, float ) {
-    offset *= 0.001f;//the sensitivity is weird :/
+void render_input_cursor(GLFWwindow*, double) {//ddt) {
+    //float dt = static_cast<float>(ddt);
+    glm::vec2 offset = ui::d_cursor_pos * 0.001f;
     glm::vec3 look_new = cam->look_dir() +
         + offset.x * cam->right() - offset.y * cam->up();
     cam->set_rot(look_new, cam->up());
 }
 
-void render_input_scroll(GLFWwindow*, glm::vec2 offset, float ds) {
-    cam->zoom(cam->zoom()*(1+offset.y*ds));
+void render_input_scroll(GLFWwindow*, double ddt) {
+    float dt = static_cast<float>(ddt);
+    cam->zoom(cam->zoom()*(1+ui::d_scroll * dt));
 }
 
 void framebuffer_resize(GLFWwindow* w, int width, int height) {

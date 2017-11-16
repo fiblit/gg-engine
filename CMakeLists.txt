@@ -63,7 +63,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     #alternate for clang & gcc: -Wall -Wextra -pedantic -std=c++17 -Werror
     #Keep the following, though; it took forever to compile.
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-        -Wall -Wextra -Wpedantic -std=c++17 -Werror \
+        -Wall -Wextra -Wpedantic -std=c++17 -Werror -Wfatal-errors\
         -Wold-style-cast -Wcast-align -Wcast-qual -Wuseless-cast \
         -Wconversion -Wsign-conversion -Wsign-promo -Wsign-promo \
         -Wdisabled-optimization -Wstrict-overflow=5 -Wabi \

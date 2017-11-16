@@ -4,13 +4,13 @@
 
 using namespace std;
 
-unique_ptr<Points> PRM::nearby(NodeId source, float threshold) {
-    unique_ptr<Points> neighbors(new Points());
+unique_ptr<Nodes> PRM::nearby(NodeId source) {
+    unique_ptr<Nodes> neighbors(new Nodes());
     glm::vec2 from = *_roadmap->data(source);
     _roadmap->for_vertex([&](NodeId v){
         glm::vec2 test = *_roadmap->data(v);
-        if (glm::distance(from, test) < threshold) {
-            //push the close enough node onto the neighbors list
+        //not the identical vertex and close enough
+        if (v != source && glm::distance(from, test) < _threshold) {
             neighbors->insert(v);
         }
     });
@@ -19,13 +19,11 @@ unique_ptr<Points> PRM::nearby(NodeId source, float threshold) {
 
 void PRM::connect() {
     _roadmap->for_vertex([&](NodeId v) {
-        unique_ptr<Points> near(nearby(v, 5.f));
-
-        //connect nearby to v
-        for (NodeId i : *near) {
+        //connect nearby nodes to v
+        for (NodeId i : *nearby(v)) {
             //if the nearby points are within line of sight
             if (_cspace->line_of_sight(*_roadmap->data(v), *_roadmap->data(i))) {
-                //directed because we'll traverse the other side
+                //directed because we'll traverse the other side in for_vertex
                 _roadmap->add_dir_edge(v, i); 
             }
         }
@@ -34,39 +32,48 @@ void PRM::connect() {
 
 void PRM::sample_space() {
     Seeder s;
-    uniform_real_distribution<float> std(-0.5f, 0.5f);
-
-    int sample_count = 1;
-    float b = 2.8f;
-    float nudge = .2f;
-    glm::vec2 dims(20, 20);
-    glm::vec2 radius(dims.x - b, dims.y - b);
-    radius /= 2;
+    typedef uniform_real_distribution<float> UFD;
+    UFD perturber(-_perturb, _perturb);
+    UFD sampler_x(-_bin_dim.x * _variance / 2.f, _bin_dim.x * _variance / 2.f);
+    UFD sampler_y(-_bin_dim.y * _variance / 2.f, _bin_dim.y * _variance / 2.f);
 
     //for each bin
-    for (float x = -radius.x; x < radius.x; x += b) {
-        for (float y = -radius.y; y < radius.y; y += b) {
+    for (float x = _lo_bound.x; x < _hi_bound.x; x += _bin_dim.x) {
+        for (float y = _lo_bound.y; y < _hi_bound.y; y += _bin_dim.y) {
             //for multiple samples per bin
-            for (int i = 0; i < sample_count; ++i) {
-                glm::vec2 sample(std(s.gen())*b + x, std(s.gen())*b + y);
+            for (int i = 0; i < _bin_samp; ++i) {
+                glm::vec2 sample(sampler_x(s.gen()), sampler_y(s.gen()));
+                //place on correct bin
+                sample += glm::vec2(x, y);
+                //center point on bin
+                sample += _bin_dim/2.f;
+
                 //nudge until out of something; could theoretically take a while
-                while (_cspace->collides(sample)) {
-                    sample += nudge * glm::vec2(std(s.gen()), std(s.gen()));
-                    sample = glm::clamp(sample, -radius, radius);
+                //only do this if perturb is not 0.
+                bool collides = false;
+                while ((collides = _cspace->collides(sample)) && abs(_perturb) > 0) {
+                    sample += glm::vec2(perturber(s.gen()), perturber(s.gen()));
+                    sample = glm::clamp(sample, _lo_bound, _hi_bound);
                 }
-                _roadmap->add_vertex(sample);
+
+                //if it wasn't perturbed, need to check for collision.
+                if (!collides) {
+                    _roadmap->add_vertex(sample);
+                }
             }
         }
     }
 }
 
-PRM::PRM(glm::vec2 start, glm::vec2 goal, unique_ptr<Cspace2d> cspace) 
-        : _cspace(std::move(cspace)) {
+PRM::PRM(unique_ptr<Cspace2d> cspace,
+        float threshold, float perturb, glm::vec2 bin_dim, int bin_samp,
+        glm::vec2 lo_bound, glm::vec2 hi_bound, float variance) 
+        : _cspace(std::move(cspace)), 
+        _threshold(threshold), _perturb(perturb), _bin_dim(bin_dim),
+        _bin_samp(bin_samp), _lo_bound(lo_bound),
+        _hi_bound(hi_bound), _variance(variance) {
     _roadmap = std::make_unique<Graph<glm::vec2>>();
-
     sample_space();
-    _roadmap->add_vertex(start);
-    _roadmap->add_vertex(goal);
     connect();
 }
 
@@ -76,6 +83,12 @@ Cspace2d::Cspace2d(vector<BoundVolume*> obs, BoundVolume* agent) {
     for (BoundVolume* o : obs) {
         vector<BoundVolume*> ms = agent->minkowski_sum(o);
         _obstacles.insert(_obstacles.end(), ms.begin(), ms.end());
+    }
+}
+
+Cspace2d::~Cspace2d() {
+    for (BoundVolume* bv : _obstacles ) {
+        delete bv;
     }
 }
 

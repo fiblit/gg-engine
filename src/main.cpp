@@ -14,6 +14,7 @@
 #include "util/Timer.h"
 #include "render.h"
 #include "io.h"
+#include "ui.h"
 
 using namespace std;
 
@@ -82,8 +83,7 @@ int main(int, char**) {
 
     glViewport(0, 0, size.x, size.y);
 
-    input_callbacks(window);
-
+    ui::init_callbacks(window);
     draw_init(size);
 
     //main loop
@@ -93,14 +93,7 @@ int main(int, char**) {
     auto last_s = init_time.time();
     while (!glfwWindowShouldClose(window)) {
         frame_time.tick();
-        draw();
-
-        //double buffer
-        glfwSwapBuffers(window);
-        //input handling
-        glfwPollEvents();   
-        input_handler(window, frame_time.delta_s());
-
+        //FPS recorder
         if (1 < std::chrono::duration_cast<std::chrono::seconds>(
                 frame_time.time() - last_s).count()) { 
             std::clog << "FPS: " << fps << "\n";
@@ -109,6 +102,15 @@ int main(int, char**) {
         } else {
             ++fps;
         }
+
+        //render
+        draw();
+
+        //double buffer
+        glfwSwapBuffers(window);
+        //input handling
+        glfwPollEvents();
+        ui::handle_input(window, frame_time.delta_s());
     }
 
     //free all memory and libraries
