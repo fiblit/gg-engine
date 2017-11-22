@@ -59,7 +59,7 @@ void init(std::vector<Agent*> dynamics, std::vector<Object*> statics) {
             o->_ai->num_done = 0;
             o->_ai->cspace = std_cspace;
             o->_ai->prm = std_prm;
-            o->_ai->final_goal = glm::vec2(0, 0);
+            o->_ai->local_goal = glm::vec2(0, 0);
         }
     }
 }

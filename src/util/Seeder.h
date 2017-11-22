@@ -3,20 +3,21 @@
 
 #include <random>
 #include <chrono>
+#include <cstdint>
 
-typedef unsigned long long U64;
 typedef std::chrono::high_resolution_clock HRClock;
 
+//singleton seed generator
 class Seeder {
 public:
     Seeder();
 
     void reseed();
-    U64 seed();
-    void seed(U64 s);
+    uint64_t seed();
+    void seed(uint64_t s);
     std::default_random_engine& gen();
 private:
-    static U64 _seed;
+    static uint64_t _seed;
     static HRClock::time_point _first;
     static std::default_random_engine _gen;
 };
