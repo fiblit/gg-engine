@@ -1,12 +1,10 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include "Pool.h"
 #include <utility>
 #include <string>
 #include <cstdint>
-
-const int N_COMP = 5;
-enum class Comp {TRANSFORM, MESH, DYNAMICS, BOUND_VOLUME, AGENT};
 
 struct Entity {
     Entity(uint16_t i) : id(i), comp({0}) {};

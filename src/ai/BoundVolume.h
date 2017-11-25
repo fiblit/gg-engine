@@ -13,6 +13,7 @@ public:
     enum class volume_type { CIRC, RECT };
 
     //TODO dalton: remove origin, if possible
+    //TODO: remove redundancies that need to be synced.
     glm::vec2 _o;//origin
     //what type this is instantiated as; manual polymorphism
     volume_type _vt;
