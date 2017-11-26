@@ -13,20 +13,18 @@
 #include <unordered_map>
 #include <cstdint>
 
-const unsigned N_COMP = 5;
-
 template <typename T>
 class DataTable {
 public:
     DataTable();
-    template <typename T>
     uint16_t create(T&&);
-    template <typename T>
-    std::experimental::optional<T&> get(uint16_t);
+    T* get(uint16_t);
+    void attach(uint16_t id, uint16_t e);
+    std::experimental::optional<uint16_t> other(uint16_t);
+    void for_(std::function<void(T&, uint16_t)>);
 
-    //TODO: get rid of unordered map; and the pointers if possible.
-    //overusing new is very very very bad
-    std::unordered_map<uint16_t, T> _table;
+    //TODO: get rid of unordered map
+    std::unordered_map<uint16_t, std::pair<uint16_t, T>> _table;
     uint16_t _count;
 };
 
@@ -35,30 +33,46 @@ public:
     Pool();
 
     const Entity& spawn_entity();
-    void for_entity(std::function<void(const Entity&)>);
+    void for_entity(std::function<void(Entity&)>);
     //fix discrepancies between components for all entities
     void all_sync();
 
     //T must be a component type
     template <typename T>
-    uint16_t create(T&& = T());
+    uint16_t create(T&&);
+
+    //T must be a component type; also comp_id is NOT Entity::id
+    template <typename T>
+    T* get(uint16_t comp_id);
+
     //T must be a component type
     template <typename T>
-    std::experimental::optional<T&> get(uint16_t);
+    T* get(const Entity&);
+
     //T must be a component type
     template <typename T>
-    void attach(const Entity&, uint16_t);
+    void attach(Entity&, uint16_t);
 
     template <typename T>
-    void for_(std::function<void(const T&));
+    void for_(std::function<void(T&, Entity&)>);
 private:
-    DataTable<Entity> _entity_table;
+    std::unordered_map<uint16_t, Entity> _entity_table;
+    uint16_t _entity_count;
+
+    template<typename T>
+    DataTable<T> _table();
+
+    template<typename T>
+    unsigned _comp();
+
     //A 0 entry = 'null' entity
     DataTable<Transform> _transform_table;
     DataTable<Mesh> _mesh_table;
     DataTable<Dynamics> _dynamics_table;
-    DataTable<BoundVolume> _bound_volume_table;
+    DataTable<BoundVolume*> _bound_volume_table;
     DataTable<Agent> _agent_table;
 };
+
+extern Pool POOL;
 
 #endif//POOL_H

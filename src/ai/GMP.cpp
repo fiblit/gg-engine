@@ -70,12 +70,6 @@ PointPath* find_path_ucs(Graph<glm::vec2>* roadmap, NodeId start, NodeId goal) {
     return find_path_astar(0, roadmap, start, goal);
 }
 
-void replan(std::vector<Agent*> agents) {
-    for (Agent* a : agents) {
-        plan_one(a);
-    }
-}
-
 //just do an LoS over every node 
 static void connect_to_all(Graph<glm::vec2>* rm, NodeId v, Cspace2d* cspace) {
     rm->for_vertex([&](NodeId u){
@@ -85,30 +79,22 @@ static void connect_to_all(Graph<glm::vec2>* rm, NodeId v, Cspace2d* cspace) {
     });
 }
 
-void plan_one(Agent* agent) {
+void plan_one(Agent& a) {
     //this is to fix the one hack in A*
     //temporarily add to the roadmap the start/goal nodes of agent
-    Graph<glm::vec2>* rm = agent->_ai->prm->_roadmap.get();
+    Graph<glm::vec2>* rm = a.prm->_roadmap.get();
 
-    NodeId start = rm->add_vertex(agent->_ai->start);
-    NodeId goal = rm->add_vertex(agent->_ai->final_goal);
-    connect_to_all(rm, start, agent->_ai->cspace);
-    connect_to_all(rm, goal, agent->_ai->cspace);
+    NodeId start = rm->add_vertex(a.start);
+    NodeId goal = rm->add_vertex(a.final_goal);
+    connect_to_all(rm, start, a.cspace);
+    connect_to_all(rm, goal, a.cspace);
 
     // PATH PLANNING METHOD
-    agent->_ai->plan = find_path_astar(1.f, rm, start, goal);
+    a.plan = find_path_astar(1.f, rm, start, goal);
 
     rm->del_vertex(start);
     rm->del_vertex(goal);
 
-    agent->_ai->num_done = 0;
-}
-
-bool invalid(Agent* agent)
-{
-    AIComp& ai = *(agent->_ai);
-    return (ai.cspace->line_of_sight(ai.start, ai.final_goal)
-        || (ai.num_done != 0//I have somewhere to go
-            && ai.plan->size() <= 1 + static_cast<size_t>(ai.num_done)));
+    a.num_done = 0;
 }
 }

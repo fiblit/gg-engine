@@ -15,6 +15,10 @@
 #include "render.h"
 #include "io.h"
 #include "ui.h"
+#include "ai/ai.h"
+//TOOD: move physics into its own directory :p
+#include "ai/physics.h"
+#include "Pool.h"
 
 using namespace std;
 
@@ -71,7 +75,7 @@ int main(int, char**) {
     }
     //center window
     glfwSetWindowPos(window, mode0->width/2 - size.x/2, mode0->height/2 - size.y/2);
-    glfwSetFramebufferSizeCallback(window, framebuffer_resize);
+    glfwSetFramebufferSizeCallback(window, render::framebuffer_resize);
     glfwMakeContextCurrent(window);
 
     //load glad in window context
@@ -84,7 +88,9 @@ int main(int, char**) {
     glViewport(0, 0, size.x, size.y);
 
     ui::init_callbacks(window);
-    draw_init(size);
+    ai::init();
+    physics::init();
+    render::init(size);
 
     //main loop
     Timer init_time;
@@ -94,24 +100,33 @@ int main(int, char**) {
     while (!glfwWindowShouldClose(window)) {
         frame_time.tick();
         //FPS recorder
-        if (1 < std::chrono::duration_cast<std::chrono::seconds>(
-                frame_time.time() - last_s).count()) { 
-            std::clog << "FPS: " << fps << "\n";
+        if (1 < chrono::duration_cast<chrono::seconds>(frame_time.time() - last_s).count()) {
+            clog << "FPS: " << fps << "\n";
             fps = 0;
             last_s = frame_time.time();
         } else {
             ++fps;
         }
 
-        //render
-        draw();
-
+        ////UI: would iterate over controllers, but it just handles specific
+        //entities for now
+        glfwPollEvents();
+        //input handling
+        ui::handle_input(window, frame_time.delta_s());
+        ////AI: iterates over agents, which often depend on boundvolumes, dynamics
+        //and transforms.
+        ai::update_agents();
+        ////Physics: iterates over dynamics, which often depend on boundvolumes,
+        //and transforms.
+        physics::simulate(static_cast<float>(frame_time.delta_s()));
+        ////sync: currently some components have redundant information that
+        //needs to be synced every frame.
+        POOL.all_sync();
+        ////Render: iterates over meshes, which often depend on transforms.
+        render::draw();
         //double buffer
         glfwSwapBuffers(window);
-        //input handling
-        glfwPollEvents();
-        ui::handle_input(window, frame_time.delta_s());
-    }
+   }
 
     //free all memory and libraries
     glfwTerminate();

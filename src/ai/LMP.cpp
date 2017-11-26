@@ -1,30 +1,31 @@
 #include "LMP.h"
+#include "Pool.h"
 //#include "debug.hpp"
 #include <limits>
 
 //TODO: properly polymorph for all BoundingVolumes
-float LMP::ttc(BoundVolume* i, glm::vec2 iv, BoundVolume* j, glm::vec2 jv) {
+float LMP::ttc(BoundVolume& i, glm::vec2 iv, BoundVolume& j, glm::vec2 jv) {
     //I wish there was a way I didn't have to check the types..
-    if (i->_vt == BoundVolume::volume_type::CIRC) {
-        Circ* c = dynamic_cast<Circ*>(i);
-        if (j->_vt == BoundVolume::volume_type::CIRC) {
-            return ttc_(c, iv, dynamic_cast<Circ*>(j), jv);
-        } else if (j->_vt == BoundVolume::volume_type::RECT) {
-            return ttc_(c, iv, dynamic_cast<Rect*>(j), jv);
+    if (i._vt == BoundVolume::volume_type::CIRC) {
+        Circ& c = dynamic_cast<Circ&>(i);
+        if (j._vt == BoundVolume::volume_type::CIRC) {
+            return ttc_(c, iv, dynamic_cast<Circ&>(j), jv);
+        } else if (j._vt == BoundVolume::volume_type::RECT) {
+            return ttc_(c, iv, dynamic_cast<Rect&>(j), jv);
         }
     }
-    else if (i->_vt == BoundVolume::volume_type::RECT) {
-        Rect* r = dynamic_cast<Rect*>(i);
-        if (j->_vt == BoundVolume::volume_type::RECT) {
-            return LMP::ttc_(r, iv, dynamic_cast<Rect*>(j), jv);
-        } else if (j->_vt == BoundVolume::volume_type::CIRC) {
-           return LMP::ttc_(dynamic_cast<Circ*>(j), jv, r, iv);
+    else if (i._vt == BoundVolume::volume_type::RECT) {
+        Rect& r = dynamic_cast<Rect&>(i);
+        if (j._vt == BoundVolume::volume_type::RECT) {
+            return LMP::ttc_(r, iv, dynamic_cast<Rect&>(j), jv);
+        } else if (j._vt == BoundVolume::volume_type::CIRC) {
+           return LMP::ttc_(dynamic_cast<Circ&>(j), jv, r, iv);
         }
     }
     return std::numeric_limits<float>::max();
 }
 
-float LMP::ttc_(Circ* i, glm::vec2 iv, Circ* j, glm::vec2 jv) {
+float LMP::ttc_(Circ& i, glm::vec2 iv, Circ& j, glm::vec2 jv) {
     /*    float r = i->r + j->r;
     glm::vec2 w = j->o - i->o;
     float w2 = glm::dot(w, w);
@@ -38,23 +39,23 @@ float LMP::ttc_(Circ* i, glm::vec2 iv, Circ* j, glm::vec2 jv) {
     //r -= smaller;
     //c = w2 - r * r;
     }    */
-    Circ cspace_circ = Circ(i->_o, i->_r + j->_r);
-    return cspace_circ.intersect(j->_o, jv - iv);
+    Circ cspace_circ = Circ(i._o, i._r + j._r);
+    return cspace_circ.intersect(j._o, jv - iv);
 }
 
 //finds the ttc via a component analysis of the velocity vectors
-float LMP::ttc_(Rect* i, glm::vec2 iv, Rect* j, glm::vec2 jv) {
-    Rect r = Rect(i->_o, i->_w + j->_w, i->_h + j->_h);
+float LMP::ttc_(Rect& i, glm::vec2 iv, Rect& j, glm::vec2 jv) {
+    Rect r = Rect(i._o, i._w + j._w, i._h + j._h);
     glm::vec2 dv = jv - iv;
-    return r.intersect(j->_o, dv);
+    return r.intersect(j._o, dv);
 }
 
-float LMP::ttc_(Circ* i, glm::vec2 iv, Rect* j, glm::vec2 jv) {
-    std::vector<BoundVolume*> ms = j->minkowski_sum(i);
+float LMP::ttc_(Circ& i, glm::vec2 iv, Rect& j, glm::vec2 jv) {
+    std::vector<BoundVolume*> ms = j.minkowski_sum(&i);
     float t_min = std::numeric_limits<float>::max();
     glm::vec2 dv = jv - iv;
     for (BoundVolume* bv : ms) {
-        float t = bv->intersect(j->_o, dv);
+        float t = bv->intersect(j._o, dv);
         if (t < t_min)
             t_min = t;
         delete bv;
@@ -62,29 +63,25 @@ float LMP::ttc_(Circ* i, glm::vec2 iv, Rect* j, glm::vec2 jv) {
     return t_min;
 }
 
-glm::vec2 LMP::lookahead(Agent* a, glm::vec2 target) {
-    glm::vec2 t_new = target;
-    AIComp& ai = *(a->_ai);
+glm::vec2 LMP::lookahead(Agent& a, BoundVolume& bv) {
+    glm::vec2 t_new = a.local_goal;
     //if not at end
-    if (static_cast<size_t>(ai.num_done) < ai.plan->size()) {
-        t_new = (*(ai.plan))[static_cast<size_t>(ai.num_done)];
+    if (static_cast<size_t>(a.num_done) < a.plan->size()) {
+        t_new = (*(a.plan))[static_cast<size_t>(a.num_done)];
 
-        size_t next = static_cast<size_t>(ai.num_done + 1);
-        bool incomplete = ai.plan->size() > next;
-        bool next_visible = ai.cspace->line_of_sight(a->_bv->_o,
-            (*(ai.plan))[next]);
+        size_t next = static_cast<size_t>(a.num_done + 1);
+        bool incomplete = a.plan->size() > next;
+        bool next_visible = a.cspace->line_of_sight(bv._o, (*(a.plan))[next]);
         while (incomplete && next_visible) {
-            ai.num_done++;
-            t_new = (*(ai.plan))[static_cast<size_t>(ai.num_done)];
-            next = static_cast<size_t>(ai.num_done + 1);
-            incomplete = ai.plan->size() > next;
-            next_visible = ai.cspace->line_of_sight(a->_bv->_o,
-                (*(ai.plan))[next]);
+            a.num_done++;
+            t_new = (*(a.plan))[static_cast<size_t>(a.num_done)];
+            next = static_cast<size_t>(a.num_done + 1);
+            incomplete = a.plan->size() > next;
+            next_visible = a.cspace->line_of_sight(bv._o, (*(a.plan))[next]);
         }
-    }
-    else {
+    } else {
         //at end, go to end.
-        t_new = (*(ai.plan))[ai.plan->size() - 1];
+        t_new = (*(a.plan))[a.plan->size() - 1];
     }
     return t_new;
 }
@@ -101,16 +98,18 @@ glm::vec2 LMP::ttc_forces_(double ttc, glm::vec2 dir) {
     mag = mag > 20 ? 20 : mag;
     return glm::vec2(mag * dir.x, mag * dir.y);
 }
-glm::vec2 LMP::ttc_forces(Agent* a, Circ* b, float ttc) {
-    glm::vec2 V_dt(a->_dyn->vel);
-    glm::vec2 dir = (a->_bv->_o + V_dt - b->_o);
+glm::vec2 LMP::ttc_forces(Dynamics& da, BoundVolume& bva, BoundVolume& bvb,
+        float ttc) {
+    glm::vec2 V_dt(da.vel.x * ttc, da.vel.z * ttc);
+    glm::vec2 dir = (bva._o + V_dt - bvb._o);
     return ttc_forces_(ttc, dir);
 }
-glm::vec2 LMP::ttc_forces(Agent * a, Agent* b, float ttc) {
-    glm::vec2 V_dt(a->_dyn->vel * ttc);
-    glm::vec2 bV_dt(b->_dyn->vel * ttc);
+glm::vec2 LMP::ttc_forces(Dynamics& da, BoundVolume& bva,
+        Dynamics& db, BoundVolume& bvb, float ttc) {
+    glm::vec2 V_dt(da.vel.x * ttc, da.vel.z * ttc);
+    glm::vec2 bV_dt(db.vel.x * ttc, db.vel.z * ttc);
     //glm::vec2 perturb(0.000001, 0.000001);
-    glm::vec2 dir = (a->_bv->_o + V_dt - b->_bv->_o - bV_dt);// +perturb);
+    glm::vec2 dir = (bva._o + V_dt - bvb._o - bV_dt);// +perturb);
     return ttc_forces_(ttc, dir);
 }
 
@@ -197,23 +196,26 @@ glm::vec2 boid_force(Agent* a, BVH* dynamic_bvh, std::vector<Agent*> dynamics) {
 */
 
 glm::vec2 LMP::calc_sum_force(
-        Agent* a,
-        BVH<Object>* static_bvh,
-        BVH<Agent>* dynamic_bvh,
-        std::vector<Object*>, //statics
-        std::vector<Agent*>) {// dynamics) {
+        Entity* e,
+        BVH* static_bvh,
+        BVH* dynamic_bvh,
+        std::vector<Entity*>, //statics
+        std::vector<Entity*>) {// dynamics) {
     float speed = 6.0f; // x m/s
     glm::vec2 goal_vel;
     glm::vec2 goal_F(0);
 
     //if there is a plan, follow it
-    if (a->_ai->has_plan()) {
-        a->_ai->local_goal = LMP::lookahead(a, a->_ai->local_goal);
-        goal_vel = glm::normalize(a->_ai->local_goal - a->_bv->_o) * speed /** dt*/;
-        goal_F = 2.0f*(goal_vel - glm::vec2(a->_dyn->vel.x, a->_dyn->vel.z));
+    auto& a = *POOL.get<Agent>(*e);
+    auto& bv = **POOL.get<BoundVolume*>(*e);
+    auto& d = *POOL.get<Dynamics>(*e);
+    if (a.has_plan()) {
+        a.local_goal = LMP::lookahead(a, bv);
+        goal_vel = glm::normalize(a.local_goal - bv._o) * speed /** dt*/;
+        goal_F = 2.0f*(goal_vel - glm::vec2(d.vel.x, d.vel.z));
     }
     else {
-        a->_ai->local_goal = a->_bv->_o;
+        a.local_goal = bv._o;
         goal_vel = glm::vec2(0);
         goal_F = glm::vec2(0);
     }
@@ -222,34 +224,33 @@ glm::vec2 LMP::calc_sum_force(
 
     /* ttc - approximate */
     glm::vec2 ttc_F(0);
-    Circ q(a->_bv->_o, real_speed * 5);
-    std::vector<std::pair<BoundVolume*,Agent*>> NNdynamic = dynamic_bvh->query(&q);
-    for (std::pair<BoundVolume*,Agent*> near : NNdynamic) {
-        Agent* b = near.second;
-        if (a == b) {
+    Circ q(bv._o, real_speed * 5);
+    std::vector<Entity*> NNdynamic = dynamic_bvh->query(&q);
+    for (Entity* near : NNdynamic) {
+        auto b = POOL.get<Agent>(*near);
+        auto& bbv = **POOL.get<BoundVolume*>(*near);
+        auto& bd = *POOL.get<Dynamics>(*near);
+        if (&a == b) {
+            //if the agents are the same, move on.
             continue;
         }
-        double ttc = LMP::ttc(a->_bv, glm::vec2(a->_dyn->vel.x, a->_dyn->vel.z),
-            b->_bv, glm::vec2(b->_dyn->vel.x, b->_dyn->vel.z));
+        double ttc = LMP::ttc(bv, glm::vec2(d.vel.x, d.vel.z),
+            bbv, glm::vec2(bd.vel.x, bd.vel.z));
         if (ttc > 4) {//seconds
             continue;
         }
-        ttc_F += LMP::ttc_forces(a, b, static_cast<float>(ttc));
+        ttc_F += LMP::ttc_forces(d, bv, bd, bbv, static_cast<float>(ttc));
     }
 
-    
-    std::vector<std::pair<BoundVolume*,Object*>> NNstatic = static_bvh->query(&q);
-    for (std::pair<BoundVolume*,Object*> near : NNstatic) {
-        Object* s = near.second;
-        double ttc = LMP::ttc(a->_bv, glm::vec2(a->_dyn->vel.x, a->_dyn->vel.z),
-            s->_bv, glm::vec2(0));
-
+    std::vector<Entity*> NNstatic = static_bvh->query(&q);
+    for (Entity* near : NNstatic) {
+        auto& bbv = **POOL.get<BoundVolume*>(*near);
+        double ttc = LMP::ttc(bv, glm::vec2(d.vel.x, d.vel.z),
+            bbv, glm::vec2(0));
         if (ttc > 4) {//seconds
             continue;
         }
-
-        Agent* dyn_s = new Agent(nullptr, s->_bv, new Dynamics(), s->_transform, s->_mesh);
-        ttc_F += ttc_forces(a, dyn_s, static_cast<float>(ttc));
+        ttc_F += ttc_forces(d, bv, bbv, static_cast<float>(ttc));
     }
 
     /*

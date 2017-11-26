@@ -17,6 +17,7 @@
 
 using namespace std;
 
+namespace render {
 shared_ptr<Shader> tricolor;
 unique_ptr<DirLight> dir_light;
 unique_ptr<PointLight> point_light;
@@ -57,7 +58,7 @@ GLuint create_tex(std::string path) {
     return tex;
 }
 
-void draw_init(glm::vec<2, int> dims) {
+void init(glm::vec<2, int> dims) {
     ui::add_handler(render_input_key);
     ui::add_handler(render_input_cursor);
     ui::add_handler(render_input_scroll);
@@ -208,3 +209,4 @@ void framebuffer_resize(GLFWwindow* w, int width, int height) {
 
     cam->aspect(static_cast<float>(width)/static_cast<float>(height));
 }
+}//render::

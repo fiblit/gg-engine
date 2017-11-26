@@ -2,8 +2,10 @@
 
 using namespace std::experimental;
 
+Pool POOL;
+
 template <typename T>
-DataTable::DataTable() :
+DataTable<T>::DataTable() :
     _table(),
     _count(0) {
 }
@@ -12,20 +14,45 @@ template <typename T>
 uint16_t DataTable<T>::create(T&& t) {
     //nothing should ever be assigned 0.
     ++_count;
-    _table[_count] = std::move(t); 
+    _table.emplace(std::piecewise_construct,
+        std::forward_as_tuple(_count),
+        std::forward_as_tuple(0, std::move(t))); 
     return _count;
 }
 
 template <typename T>
-optional<T&> DataTable<T>::get(uint16_t id) {
-    if (id == 0) {
-        return nullopt;
+T* DataTable<T>::get(uint16_t id) {
+    auto v = _table.find(id);
+    if (id == 0 || v == _table.end()) {
+        return nullptr;
     }
-    return _table[id];
+    return &(v->second.second);
 }
 
-Pool::Pool() :
-    _entity_table(),
+template <typename T>
+void DataTable<T>::attach(uint16_t id, uint16_t e) {
+    _table.at(id).first = e;
+}
+
+template <typename T>
+optional<uint16_t> DataTable<T>::other(uint16_t id) {
+    auto v = _table.find(id);
+    if (id == 0 || v == _table.end()) {
+        return nullopt;
+    }
+    return v->first;
+}
+
+template <typename T>
+void DataTable<T>::for_(std::function<void(T&, uint16_t)> f) {
+    for (auto& v : _table) {
+        f(v.second.second, v.second.first);
+    }
+}
+
+Pool::Pool()
+    : _entity_table(),
+    _entity_count(0),
     _transform_table(),
     _mesh_table(),
     _dynamics_table(),
@@ -34,143 +61,110 @@ Pool::Pool() :
 }
 
 const Entity& Pool::spawn_entity() {
-    uint16_t eid = _entity_table.create(Entity(_entity_table._count + 1));
-    return *_entity_table.get(eid);
+    ++_entity_count;
+    //I "love" C++ sometimes; fucking piece of convoluted shit.
+    //Anyways, this next line creates the Entity in place at _entity_count in
+    //the _entity_table, while also returning a reference to the Entity created.
+    return (*_entity_table.emplace(std::piecewise_construct,
+        std::forward_as_tuple(_entity_count),
+        std::forward_as_tuple(_entity_count)).first).second;
 }
 
 //this WILL be slow. :(
 void Pool::all_sync() {
     for_entity([this](const Entity& e){
-        auto t = get<Transform>(e.comp[0]);
-        auto d = get<Dynamics>(e.comp[2]);
-        auto bv = get<BoundVolume>(e.comp[3]);
-        auto a = get<Agent>(e.comp[4]);
-        if (d != nullopt) {
-            if (t != nullopt) {
+        auto t = get<Transform>(e);
+        auto d = get<Dynamics>(e);
+        auto bv = get<BoundVolume*>(e);
+        auto a = get<Agent>(e);
+        glm::vec2 p2d;
+        if (d) {
+            if (t) {
                 t->set_pos(d->pos);
             }
+            p2d = glm::vec2(d->pos.x, d->pos.z);
+        } else if (t) {
+            p2d = glm::vec2(t->pos().x, t->pos().z);
         }
-
-        if (t != nullopt) {
-            auto p2d = glm::vec2(t->pos().x, t->pos().z);
-            if (bv != nullopt) {
-                bv->_o = p2d;
-            }
-            if (a != nullopt) {
-                a->start = p2d;
-            }
+        if (bv && (t || d)) {
+            (*bv)->_o = p2d;
+        }
+        if (a && (t || d)) {
+           a->start = p2d;
         }
     });
 }
 
-void Pool::for_entity(std::function<void(const Entity& )> f) {
-    for (auto& e : _entity_table._table) {
-        f(e.first);
+void Pool::for_entity(std::function<void(Entity&)> f) {
+    for (auto& e : _entity_table) {
+        f(e.second);
     }
 }
 
-template <typename T> uint16_t Pool::create() {return 0;}
-template <typename T> optional<T&> Pool::get(uint16_t) {return nullopt;}
-template <typename T> void Pool::attach(const Entity&, uint16_t) {}
-template <typename T> void Pool::for_(std::function<void(const T&)>) {}
+template <typename T> DataTable<T> Pool::_table() {throw;}
+template<> DataTable<Transform> Pool::_table<Transform>() {return _transform_table;}
+template<> DataTable<Mesh> Pool::_table<Mesh>() {return _mesh_table;}
+template<> DataTable<Dynamics> Pool::_table<Dynamics>() {return _dynamics_table;}
+template<> DataTable<BoundVolume*> Pool::_table<BoundVolume*>() {return _bound_volume_table;}
+template<> DataTable<Agent> Pool::_table<Agent>() {return _agent_table;}
 
-//what follows is painfully repetitive. Didn't know a better way to do it. :(
-template<>
-uint16_t Pool::create<Transform>(Transform&& t) {
-    return _transform_table.create(t);
-}
-template<>
-optional<Transform&> Pool::get<Transform>(uint16_t id) {
-    return _transform_table.get(id);
-}
-template<>
-void Pool::attach<Transform>(const Entity& e, uint16_t id) {
-    //transform components go into the 0th reverse index.
-    e.comp[0] = id;
-}
-template<>
-void Pool::for_<Transform>(std::function<void(const Transform&)> f) {
-    for (auto& t : _transform_table._table) {
-        f(t.first);
-    }
-}
+template <typename T> unsigned Pool::_comp() {throw;}
+template <> unsigned Pool::_comp<Transform>() {return 0;}
+template <> unsigned Pool::_comp<Mesh>() {return 1;}
+template <> unsigned Pool::_comp<Dynamics>() {return 2;}
+template <> unsigned Pool::_comp<BoundVolume*>() {return 3;}
+template <> unsigned Pool::_comp<Agent>() {return 4;}
 
-template<>
-uint16_t Pool::create<Mesh>(Mesh&& m) {
-    return _mesh_table.create(m);
+template <typename T>
+uint16_t Pool::create(T&& t) {
+    return _table<T>().create(std::move(t));
 }
-template<>
-optional<Mesh&> Pool::get<Mesh>(uint16_t id) {
-    return _mesh_table.get(id);
-}
-template<>
-void Pool::attach<Mesh>(const Entity& e, uint16_t id) {
-    //mesh components go into the 1th reverse index.
-    e.comp[1] = id;
-}
-template<>
-void Pool::for_<Mesh>(std::function<void(const Mesh&)> f) {
-    for (auto& m : _mesh_table._table) {
-        f(m.first);
-    }
-}
+template uint16_t Pool::create<Transform>(Transform&&);
+template uint16_t Pool::create<Mesh>(Mesh&&);
+template uint16_t Pool::create<Dynamics>(Dynamics&&);
+template uint16_t Pool::create<BoundVolume*>(BoundVolume*&&);
+template uint16_t Pool::create<Agent>(Agent&&);
 
-template<>
-uint16_t Pool::create<Dynamics>(Dynamics&& d) {
-    return _dynamics_table.create(d);
+template <typename T>
+T* Pool::get(uint16_t id) {
+    return _table<T>().get(id);
 }
-template<>
-optional<Mesh&> Pool::get<Dynamics>(uint16_t id) {
-    return _dynamics_table.get(id);
-}
-template<>
-void Pool::attach<Dynamics>(const Entity& e, uint16_t id) {
-    //mesh components go into the 1th reverse index.
-    e.comp[2] = id;
-}
-template<>
-void Pool::for_<Dynamics>(std::function<void(const Dynamics&)> f) {
-    for (auto& d : _dynamics_table._table) {
-        f(d.first);
-    }
-}
+template Transform* Pool::get<Transform>(uint16_t);
+template Mesh* Pool::get<Mesh>(uint16_t);
+template Dynamics* Pool::get<Dynamics>(uint16_t);
+template BoundVolume** Pool::get<BoundVolume*>(uint16_t);
+template Agent* Pool::get<Agent>(uint16_t);
 
-template<>
-uint16_t Pool::create<BoundVolume>(BoundVolume&& d) {
-    return _bound_volume_table.create(d);
-}
-template<>
-optional<BoundVolume&> Pool::get<BoundVolume>(uint16_t id) {
-    return _bound_volume_table.get(id);
-}
-template<>
-void Pool::attach<BoundVolume>(const Entity& e, uint16_t id) {
-    //mesh components go into the 1th reverse index.
-    e.comp[3] = id;
-}
-template<>
-void Pool::for_<BoundVolume>(std::function<void(const BoundVolume&)> f) {
-    for (auto& bv : _bound_volume_table._table) {
-        f(bv.first);
-    }
-}
 
-template<>
-uint16_t Pool::create<Agent>(Agent&& d) {
-    return _agent_table.create(d);
+template <typename T>
+T* Pool::get(const Entity& e) {
+    return _table<T>().get(e.comp[_comp<T>()]);
 }
-template<>
-optional<Agent&> Pool::get<Agent>(uint16_t id) {
-    return _agent_table.get(id);
+template Transform* Pool::get<Transform>(const Entity&);
+template Mesh* Pool::get<Mesh>(const Entity&);
+template Dynamics* Pool::get<Dynamics>(const Entity&);
+template BoundVolume** Pool::get<BoundVolume*>(const Entity&);
+template Agent* Pool::get<Agent>(const Entity&);
+
+template <typename T>
+void Pool::attach(Entity& e, uint16_t id) {
+    e.comp[_comp<T>()] = id;
+    _table<T>().attach(id, e.id);
 }
-template<>
-void Pool::attach<Agent>(const Entity& e, uint16_t id) {
-    //mesh components go into the 1th reverse index.
-    e.comp[4] = id;
+template void Pool::attach<Transform>(Entity& e, uint16_t);
+template void Pool::attach<Mesh>(Entity& e, uint16_t);
+template void Pool::attach<Dynamics>(Entity& e, uint16_t);
+template void Pool::attach<BoundVolume*>(Entity& e, uint16_t);
+template void Pool::attach<Agent>(Entity& e, uint16_t);
+
+template <typename T>
+void Pool::for_(std::function<void(T&, Entity&)> f) {
+    _table<T>().for_([&f, this](T& t, uint16_t eid) {
+        f(t, _entity_table.at(eid));
+    });
 }
-template<>
-void Pool::for_<Agent>(std::function<void(const Agent&)> f) {
-    for (auto& a : _agent_table._table) {
-        f(a.first);
-    }
-}
+template void Pool::for_<Transform>(std::function<void(Transform&, Entity&)>);
+template void Pool::for_<Mesh>(std::function<void(Mesh&, Entity&)>);
+template void Pool::for_<Dynamics>(std::function<void(Dynamics&, Entity&)>);
+template void Pool::for_<BoundVolume*>(std::function<void(BoundVolume*&, Entity&)>);
+template void Pool::for_<Agent>(std::function<void(Agent&, Entity&)>);

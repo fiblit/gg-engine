@@ -11,8 +11,8 @@ public:
     Transform(const Transform* parent);
 
     void set_parent(const Transform& parent);
-    void add_child(std::unique_ptr<Transform> child);
-    std::vector<std::unique_ptr<Transform>>& children();
+    void add_child(Transform* child);
+    std::vector<Transform*>& children();
     //I may want this at some point
     //void del_chld(int idx);
 
@@ -46,7 +46,7 @@ public:
     void set_pos(glm::vec3);
 private:
     const Transform* _parent;
-    std::vector<std::unique_ptr<Transform>> _children;
+    std::vector<Transform*> _children;
 
     glm::mat4 _transform;
 
