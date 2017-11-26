@@ -13,11 +13,11 @@ void Transform::set_parent(const Transform& p) {
     _parent = &p;
 }
 
-void Transform::add_child(unique_ptr<Transform> child) {
-    _children.push_back(std::move(child));
+void Transform::add_child(Transform* child) {
+    _children.push_back(child);
 }
 
-vector<unique_ptr<Transform>>& Transform::children() {
+vector<Transform*>& Transform::children() {
     return _children;
 }
 
