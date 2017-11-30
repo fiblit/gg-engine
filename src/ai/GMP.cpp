@@ -16,7 +16,7 @@ PointPath* find_path_astar(float e, Graph<glm::vec2>* roadmap,
 
     //init PQ
     //normally <
-    auto cmp = [](PQItem l, PQItem r) {return std::get<1>(l) > std::get<1>(r);}; 
+    auto cmp = [](PQItem l, PQItem r) {return std::get<1>(l) > std::get<1>(r);};
     std::priority_queue<PQItem, vector<PQItem>, decltype(cmp)> pq(cmp);
     pq.push(PQItem(start, 0.f, s));
 
@@ -70,7 +70,7 @@ PointPath* find_path_ucs(Graph<glm::vec2>* roadmap, NodeId start, NodeId goal) {
     return find_path_astar(0, roadmap, start, goal);
 }
 
-//just do an LoS over every node 
+//just do an LoS over every node
 static void connect_to_all(Graph<glm::vec2>* rm, NodeId v, Cspace2d* cspace) {
     rm->for_vertex([&](NodeId u){
         if (v != u && cspace->line_of_sight(*rm->data(v), *rm->data(u))) {

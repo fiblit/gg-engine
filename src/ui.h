@@ -12,8 +12,8 @@ extern glm::vec2 d_cursor_pos;
 extern glm::vec2 cursor_pos;
 extern float cursor_sensitivity;
 extern float d_scroll;
-extern int key_map[256];
-extern int prior_key_map[256];
+extern int key_map[512];
+extern int prior_key_map[512];
 extern std::vector<std::function<void(GLFWwindow*, double)>> handlers;
 
 //setup GLFW callback functions

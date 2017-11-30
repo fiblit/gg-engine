@@ -73,11 +73,11 @@ string texmap_to_string(Texmap t) {
 }
 
 void Mesh::bind_textures() {
-    uint map_count[4] = {0};
+    unsigned map_count[4] = {0};
     for (GLuint i = 0; i < textures.size(); ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
         Texmap t = textures[i].type;
-        uint count = ++map_count[static_cast<uint>(t)];
+        unsigned count = ++map_count[static_cast<unsigned>(t)];
         mtl->set("material." + texmap_to_string(t) + to_string(count),
             static_cast<GLint>(i));
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
@@ -85,7 +85,7 @@ void Mesh::bind_textures() {
     glActiveTexture(GL_TEXTURE0);
 }
 
-void Mesh::set_material(shared_ptr<Shader> material, float shininess,
+void Mesh::set_material(Shader* material, float shininess,
         glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular) {
     mtl = material;
     glBindVertexArray(vao);

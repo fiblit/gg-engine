@@ -1,13 +1,13 @@
 ﻿#include "BoundVolume.h"
 
-Rect::Rect() 
+Rect::Rect()
     : BoundVolume(glm::vec2(0, 0), volume_type::RECT), _w(0), _h(0) {}
 Rect::Rect(glm::vec2 o, float w, float h)
     : BoundVolume(o, volume_type::RECT), _w(w), _h(h) {}
 
-Circ::Circ() 
+Circ::Circ()
     : BoundVolume(glm::vec2(0, 0), volume_type::CIRC), _r(0) {}
-Circ::Circ(glm::vec2 o, float r) 
+Circ::Circ(glm::vec2 o, float r)
     : BoundVolume(o, volume_type::CIRC), _r(r) {}
 
 BoundVolume::~BoundVolume() {}
@@ -101,7 +101,7 @@ float Circ::intersect(glm::vec2 bo, glm::vec2 v) {
     //min t = - (u.v) +- sqrt((u.v)^. - (v.v) (u.u - r^))/(v.v)
     glm::vec2 u = bo - _o;
     float c = glm::dot(u, u) - _r * _r;
-    if (c < 0)//inside 
+    if (c < 0)//inside
         return 0;
 
     float b = glm::dot(u, v);
@@ -163,7 +163,7 @@ bool Rect::line_segs_collide(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2
     for (int i = 0; i < 2; i++)
         if (glm::dot(pp2x[i], pp2x[i]) > len2l1)
             return false;//miss
-    for (int i = 3; i < 5; i++)
+    for (int i = 2; i < 4; i++)
         if (glm::dot(pp2x[i], pp2x[i]) > len2l2)
             return false;//miss
 
@@ -196,7 +196,7 @@ static float ray_axial_line_intersect(glm::vec2 po, glm::vec2 pv, float val,
         int axis, float oValLo, float oValHi){
     //https://rootllama.wordpress.com/2014/06/20/ray-line-segment-intersection-test-in-2d/
     glm::vec2 q, s;
-    if (axis == 0) {//vert 
+    if (axis == 0) {//vert
         q = glm::vec2(val, oValLo);
         s = glm::vec2(0, oValHi - oValLo);
     }
@@ -251,7 +251,7 @@ static float ray_axial_line_intersect(glm::vec2 po, glm::vec2 pv, float val,
 float Rect::intersect(glm::vec2 bo, glm::vec2 v) {
     if (collides(bo))
         return 0;
-    
+
     float left = _o.x - _w / 2;
     float right = _o.x + _w / 2;
     float top = _o.y + _h / 2;

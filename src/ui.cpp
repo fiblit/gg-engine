@@ -6,8 +6,8 @@ float cursor_sensitivity = 1.f;
 glm::vec2 d_cursor_pos = glm::vec2(0.f, 0.f);
 glm::vec2 cursor_pos = glm::vec2(0.f, 0.f);
 float d_scroll = 0.f;
-int key_map[256] = {0};
-int prior_key_map[256] = {0};
+int key_map[512] = {0};
+int prior_key_map[512] = {0};
 std::vector<std::function<void(GLFWwindow*, double)>> handlers;
 
 bool edge_up(int key) {

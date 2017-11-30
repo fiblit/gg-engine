@@ -87,6 +87,9 @@ int main(int, char**) {
 
     glViewport(0, 0, size.x, size.y);
 
+    //auto e1 = POOL.spawn_entity();
+    //auto e2 = POOL.spawn_entity();
+
     ui::init_callbacks(window);
     ai::init();
     physics::init();

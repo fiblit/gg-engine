@@ -112,11 +112,12 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     #alternate for clang & gcc: -Wall -Wextra -pedantic -std=c++17 -Werror
     #Keep the following, though; it took forever to compile.
+    #TODO: fix strict overflow=5 warnings in release.
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
         -Wall -Wextra -Wpedantic -std=c++17 -Werror -Wfatal-errors\
         -Wold-style-cast -Wcast-align -Wcast-qual -Wuseless-cast \
         -Wconversion -Wsign-conversion -Wsign-promo -Wsign-promo \
-        -Wdisabled-optimization -Wstrict-overflow=5 -Wabi \
+        -Wdisabled-optimization -Wno-strict-overflow -Wabi \
         -Wfloat-equal -Wlogical-op \
         -Wmissing-declarations -Wmissing-include-dirs -Wundef \
         -Wformat=2 -Wzero-as-null-pointer-constant -Wstrict-null-sentinel \
@@ -149,7 +150,7 @@ target_link_libraries(
 )
 
 set_property(
-    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
+    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME}
 )
 
