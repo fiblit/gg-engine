@@ -13,18 +13,16 @@ void glcheck(const char* loc);
 //debug only expression
 #define D(x) x
 
-//variables I want to have in parameters, but are otherwise unused.
-template <class... Args> inline void UNUSED(Args&&...) {}
-
 #else
 //do nothing when GLCHECK is called in NDEBUG
 #define GLCHECK
 
 //debug only expressions dissapear!
 #define D(x)
-//is this correct? Will it cause issues with the flags?
-#define UNUSED(x)
+
 
 #endif//DEBUG
+//variables I want to have in parameters, but are otherwise unused.
+template <class... Args> inline void UNUSED(Args&&...) {}
 
 #endif//DEBUG_H

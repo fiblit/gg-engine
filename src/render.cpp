@@ -98,8 +98,8 @@ void init(glm::vec<2, int> dims) {
     //set up camera
     cam = make_unique<Camera>();
     cam->aspect(static_cast<float>(dims.x / dims.y));
-    cam->set_pos(glm::vec3(4, 5, 6));
-    cam->set_rot(glm::vec3(-0.5, -1, -1), glm::vec3(0, 1, 0));
+    cam->set_pos(glm::vec3(0, 0, 0));
+    cam->set_rot(glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
 
     //TODO: Uniform buffer object; see below
     cam->apply_proj(*mtl);

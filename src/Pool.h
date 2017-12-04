@@ -32,7 +32,7 @@ class Pool {
 public:
     Pool();
 
-    const Entity& spawn_entity();
+    Entity& spawn_entity();
     void for_entity(std::function<void(Entity&)>);
     //fix discrepancies between components for all entities
     void all_sync();

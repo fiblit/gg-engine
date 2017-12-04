@@ -10,19 +10,28 @@ DataTable<T>::DataTable() :
     _count(0) {
 }
 
+#include <iostream>
+#include <typeinfo>
+
 template <typename T>
 uint16_t DataTable<T>::create(T&& t) {
     //nothing should ever be assigned 0.
     ++_count;
+    std::cout << "c" << _count << "\n";
     _table.emplace(std::piecewise_construct,
         std::forward_as_tuple(_count),
-        std::forward_as_tuple(0, std::move(t))); 
+        std::forward_as_tuple(0, std::move(t)));
+    std::cout << "sz" << _table.size() << " t" << typeid(T).name() << "\n";
+    std::cout << "cr" << (_table.find(_count) == _table.end()) << "\n";
     return _count;
 }
 
 template <typename T>
 T* DataTable<T>::get(uint16_t id) {
+    std::cout << "f" << id << " t" << typeid(T).name() << "\n";
     auto v = _table.find(id);
+    std::cout << "fsz" << _table.size() << " t" << typeid(T).name() << "\n";
+    std::cout << "fr" << (v == _table.end()) << "\n";
     if (id == 0 || v == _table.end()) {
         return nullptr;
     }
@@ -60,7 +69,7 @@ Pool::Pool()
     _agent_table() {
 }
 
-const Entity& Pool::spawn_entity() {
+Entity& Pool::spawn_entity() {
     ++_entity_count;
     //I "love" C++ sometimes; fucking piece of convoluted shit.
     //Anyways, this next line creates the Entity in place at _entity_count in

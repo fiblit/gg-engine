@@ -10,6 +10,7 @@
 #include <glm/vec2.hpp>
 #include <iostream>
 #include <cstdlib>
+#include <cstdint>
 
 #include "util/Timer.h"
 #include "render.h"
@@ -19,6 +20,10 @@
 //TOOD: move physics into its own directory :p
 #include "ai/physics.h"
 #include "Pool.h"
+
+#include "model/CubeMesh.h"
+
+#include "util/debug.h"
 
 using namespace std;
 
@@ -41,7 +46,7 @@ int main(int, char**) {
              << GLFW_VERSION_REVISION << "\n";
         int major, minor, revision;
         glfwGetVersion(&major, &minor, &revision);
-        clog << "gg. GLFW running as v" 
+        clog << "gg. GLFW running as v"
              << major << "." << minor << "." << revision << "\n";
         clog << "gg. GLFW version string " << glfwGetVersionString() << "\n";
     }
@@ -87,8 +92,29 @@ int main(int, char**) {
 
     glViewport(0, 0, size.x, size.y);
 
-    //auto e1 = POOL.spawn_entity();
-    //auto e2 = POOL.spawn_entity();
+    for (int i = 0; i < 3; ++i) {
+        POOL.spawn_entity();
+    }
+
+    string pwd(PROJECT_SRC_DIR);
+
+    vector<Texture> textures = {
+        {render::create_tex(pwd + "/res/container2.png"), Texmap::diffuse},
+        {render::create_tex(pwd + "/res/container2_specular.png"), Texmap::specular}
+    };
+    uint16_t mid = POOL.create<Mesh>(CubeMesh(textures));
+    cout << "mid" << mid << '\n';
+    float i = 0;
+    POOL.for_entity([mid, &i](Entity& e){
+        cout << "e" << e.id << '\n';
+        uint16_t tid = POOL.create<Transform>(Transform(nullptr));
+        cout << "tid" << tid << '\n';
+        Transform* t = POOL.get<Transform>(tid);
+        cout << "tp" << t << '\n';
+        t->set_pos(glm::vec3(i++, 0, 0));
+        POOL.attach<Transform>(e, tid);
+        POOL.attach<Mesh>(e, mid);
+    });
 
     ui::init_callbacks(window);
     ai::init();
