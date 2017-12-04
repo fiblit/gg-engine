@@ -1,6 +1,11 @@
 #include "Pool.h"
+#ifdef _WIN32
+#define WIN32
+#endif
 
+#ifndef WIN32
 using namespace std::experimental;
+#endif
 
 Pool POOL;
 
@@ -44,7 +49,11 @@ void DataTable<T>::attach(uint16_t id, uint16_t e) {
 }
 
 template <typename T>
+#ifdef WIN32
+std::optional<uint16_t> DataTable<T>::other(uint16_t id) {
+#else
 optional<uint16_t> DataTable<T>::other(uint16_t id) {
+#endif
     auto v = _table.find(id);
     if (id == 0 || v == _table.end()) {
         return nullopt;

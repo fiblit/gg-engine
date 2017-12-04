@@ -1,7 +1,11 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include <experimental/optional>
+#ifdef WIN32
+	#include <optional>
+#else
+	#include <experimental/optional>
+#endif
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
@@ -20,7 +24,11 @@ public:
     void add_edge(const NodeId& v, const NodeId& u);
 
     Nodes& edges(const NodeId& v);
+	#ifdef WIN32
+	std::optional<T> data(const NodeId& v);
+	#else
     std::experimental::optional<T> data(const NodeId& v);
+	#endif
 
     void for_vertex(std::function<void(NodeId)> f);
     void for_edge(std::function<void(NodeId, NodeId)> f);
@@ -72,7 +80,11 @@ inline Nodes& Graph<T>::edges(const NodeId& v) {
 }
 
 template <class T>
+#ifdef WIN32
+inline std::optional<T> Graph<T>::data(const NodeId& v) {
+#else
 inline std::experimental::optional<T> Graph<T>::data(const NodeId& v) {
+#endif
     if (_edges.count(v)) {
         return _vertices[v];
     } else {
