@@ -2,12 +2,15 @@
 #include <fstream>
 #include <iostream>
 #include <stb_image.h>
+#include <optional>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/norm.hpp>
 #undef GLM_ENABLE_EXPERIMENTAL
 
 using namespace std;
+#ifndef WIN32
 using namespace std::experimental;
+#endif
 
 optional<const string> read_file(const string path) {
     ifstream file(path, ios::in | ios::binary);

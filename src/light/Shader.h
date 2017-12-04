@@ -7,7 +7,11 @@
 #include <vector>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
-#include <experimental/optional>
+#ifdef WIN32
+	#include <optional>
+#else
+	#include <experimental/optional>
+#endif
 
 class Shader {
 public:
@@ -35,7 +39,11 @@ private:
     GLint success;
 
     //parse for uniform types?
+#ifdef WIN32
+	std::optional<GLint> check_uniform(std::string);
+#else
     std::experimental::optional<GLint> check_uniform(std::string);
+#endif
     bool compile(GLenum type, const std::string& path);
     bool link();
 };

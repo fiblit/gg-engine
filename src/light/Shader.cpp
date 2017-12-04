@@ -7,7 +7,9 @@
 #include "../util/debug.h"
 
 using namespace std;
+#ifndef WIN32
 using namespace std::experimental;
+#endif
 
 Shader::Shader()
     : program(0)

@@ -107,7 +107,7 @@ if (${CMAKE_BUILD_TYPE} MATCHES Debug)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /std:c++latest")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /std:c++latest")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     #alternate for clang & gcc: -Wall -Wextra -pedantic -std=c++17 -Werror

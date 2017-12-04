@@ -1,14 +1,20 @@
-#ifdef _WIN32
+#ifdef WIN32
     //avoid including <windows.h> in glad
     #define APIENTRY __stdcall
 #endif
 #include <glad.h>
 #ifdef _WINDOWS_
-    #error windows.h included
+    #error windows.h was included
+#endif
+#ifdef WIN32
+    #undef near
+    #undef far
+    #define NOMINMAX
 #endif
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
 #include <cstdint>
 
