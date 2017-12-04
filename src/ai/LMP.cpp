@@ -1,5 +1,6 @@
 #include "LMP.h"
 #include "Pool.h"
+#include "BVH.h"
 //#include "debug.hpp"
 #include <limits>
 
@@ -226,10 +227,10 @@ glm::vec2 LMP::calc_sum_force(
     glm::vec2 ttc_F(0);
     Circ q(bv._o, real_speed * 5);
     std::vector<Entity*> NNdynamic = dynamic_bvh->query(&q);
-    for (Entity* near : NNdynamic) {
-        auto b = POOL.get<Agent>(*near);
-        auto& bbv = **POOL.get<BoundVolume*>(*near);
-        auto& bd = *POOL.get<Dynamics>(*near);
+    for (Entity* nearby : NNdynamic) {
+        Agent* b = POOL.get<Agent>(*nearby);
+        BoundVolume& bbv = **POOL.get<BoundVolume*>(*nearby);
+        Dynamics& bd = *POOL.get<Dynamics>(*nearby);
         if (&a == b) {
             //if the agents are the same, move on.
             continue;
@@ -243,8 +244,8 @@ glm::vec2 LMP::calc_sum_force(
     }
 
     std::vector<Entity*> NNstatic = static_bvh->query(&q);
-    for (Entity* near : NNstatic) {
-        auto& bbv = **POOL.get<BoundVolume*>(*near);
+    for (Entity* nearby : NNstatic) {
+        BoundVolume& bbv = **POOL.get<BoundVolume*>(*nearby);
         double ttc = LMP::ttc(bv, glm::vec2(d.vel.x, d.vel.z),
             bbv, glm::vec2(0));
         if (ttc > 4) {//seconds

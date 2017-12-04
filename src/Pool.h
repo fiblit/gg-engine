@@ -7,7 +7,11 @@
 #include "ai/BoundVolume.h"
 #include "ai/Dynamics.h"
 #include "model/Mesh.h"
-#include <experimental/optional>
+#ifdef WIN32
+    #include <optional>
+#else
+    #include <experimental/optional>
+#endif
 #include <functional>
 //TODO: get rid of unordered_map here, to rushed to do it right right now.
 #include <unordered_map>
@@ -20,7 +24,11 @@ public:
     uint16_t create(T&&);
     T* get(uint16_t);
     void attach(uint16_t id, uint16_t e);
+    #ifdef WIN32
+    std::optional<uint16_t> other(uint16_t);
+    #else
     std::experimental::optional<uint16_t> other(uint16_t);
+    #endif
     void for_(std::function<void(T&, uint16_t)>);
 
     //TODO: get rid of unordered map
@@ -60,7 +68,7 @@ private:
     uint16_t _entity_count;
 
     template<typename T>
-    DataTable<T> _table();
+    DataTable<T>& _table();
 
     template<typename T>
     unsigned _comp();

@@ -3,6 +3,10 @@
 
 #include <glm/vec3.hpp>
 #include "Transform.h"
+#ifdef WIN32
+#undef near
+#undef far
+#endif
 
 class Shader;
 

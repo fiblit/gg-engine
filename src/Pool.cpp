@@ -1,6 +1,11 @@
 #include "Pool.h"
+#ifdef _WIN32
+#define WIN32
+#endif
 
+#ifndef WIN32
 using namespace std::experimental;
+#endif
 
 Pool POOL;
 
@@ -10,28 +15,19 @@ DataTable<T>::DataTable() :
     _count(0) {
 }
 
-#include <iostream>
-#include <typeinfo>
-
 template <typename T>
 uint16_t DataTable<T>::create(T&& t) {
     //nothing should ever be assigned 0.
     ++_count;
-    std::cout << "c" << _count << "\n";
     _table.emplace(std::piecewise_construct,
         std::forward_as_tuple(_count),
         std::forward_as_tuple(0, std::move(t)));
-    std::cout << "sz" << _table.size() << " t" << typeid(T).name() << "\n";
-    std::cout << "cr" << (_table.find(_count) == _table.end()) << "\n";
     return _count;
 }
 
 template <typename T>
 T* DataTable<T>::get(uint16_t id) {
-    std::cout << "f" << id << " t" << typeid(T).name() << "\n";
     auto v = _table.find(id);
-    std::cout << "fsz" << _table.size() << " t" << typeid(T).name() << "\n";
-    std::cout << "fr" << (v == _table.end()) << "\n";
     if (id == 0 || v == _table.end()) {
         return nullptr;
     }
@@ -44,7 +40,11 @@ void DataTable<T>::attach(uint16_t id, uint16_t e) {
 }
 
 template <typename T>
+#ifdef WIN32
+std::optional<uint16_t> DataTable<T>::other(uint16_t id) {
+#else
 optional<uint16_t> DataTable<T>::other(uint16_t id) {
+#endif
     auto v = _table.find(id);
     if (id == 0 || v == _table.end()) {
         return nullopt;
@@ -110,12 +110,12 @@ void Pool::for_entity(std::function<void(Entity&)> f) {
     }
 }
 
-template <typename T> DataTable<T> Pool::_table() {throw;}
-template<> DataTable<Transform> Pool::_table<Transform>() {return _transform_table;}
-template<> DataTable<Mesh> Pool::_table<Mesh>() {return _mesh_table;}
-template<> DataTable<Dynamics> Pool::_table<Dynamics>() {return _dynamics_table;}
-template<> DataTable<BoundVolume*> Pool::_table<BoundVolume*>() {return _bound_volume_table;}
-template<> DataTable<Agent> Pool::_table<Agent>() {return _agent_table;}
+template <typename T> DataTable<T>& Pool::_table() {throw;}
+template<> DataTable<Transform>& Pool::_table<Transform>() {return _transform_table;}
+template<> DataTable<Mesh>& Pool::_table<Mesh>() {return _mesh_table;}
+template<> DataTable<Dynamics>& Pool::_table<Dynamics>() {return _dynamics_table;}
+template<> DataTable<BoundVolume*>& Pool::_table<BoundVolume*>() {return _bound_volume_table;}
+template<> DataTable<Agent>& Pool::_table<Agent>() {return _agent_table;}
 
 template <typename T> unsigned Pool::_comp() {throw;}
 template <> unsigned Pool::_comp<Transform>() {return 0;}

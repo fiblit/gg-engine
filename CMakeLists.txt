@@ -107,7 +107,11 @@ if (${CMAKE_BUILD_TYPE} MATCHES Debug)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /std:c++latest")
+    #Do not use warnings in MSVC because they are typically != to gcc/clang's.
+    #Normally more warnings is always better, but I don't enforce Windows
+    #compatability enough to care about its warnings. :( Also, I don't have a
+    #clean way of ignoring warnings from /lib files.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0 /std:c++latest")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     #alternate for clang & gcc: -Wall -Wextra -pedantic -std=c++17 -Werror
