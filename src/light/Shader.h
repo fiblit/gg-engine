@@ -8,9 +8,9 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 #ifdef WIN32
-	#include <optional>
+    #include <optional>
 #else
-	#include <experimental/optional>
+    #include <experimental/optional>
 #endif
 
 class Shader {
@@ -40,7 +40,7 @@ private:
 
     //parse for uniform types?
 #ifdef WIN32
-	std::optional<GLint> check_uniform(std::string);
+    std::optional<GLint> check_uniform(std::string);
 #else
     std::experimental::optional<GLint> check_uniform(std::string);
 #endif

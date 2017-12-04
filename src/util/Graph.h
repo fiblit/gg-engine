@@ -2,9 +2,9 @@
 #define GRAPH_H
 
 #ifdef WIN32
-	#include <optional>
+    #include <optional>
 #else
-	#include <experimental/optional>
+    #include <experimental/optional>
 #endif
 #include <functional>
 #include <unordered_map>
@@ -24,11 +24,11 @@ public:
     void add_edge(const NodeId& v, const NodeId& u);
 
     Nodes& edges(const NodeId& v);
-	#ifdef WIN32
-	std::optional<T> data(const NodeId& v);
-	#else
+    #ifdef WIN32
+    std::optional<T> data(const NodeId& v);
+    #else
     std::experimental::optional<T> data(const NodeId& v);
-	#endif
+    #endif
 
     void for_vertex(std::function<void(NodeId)> f);
     void for_edge(std::function<void(NodeId, NodeId)> f);
