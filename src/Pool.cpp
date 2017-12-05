@@ -79,6 +79,8 @@ Entity& Pool::spawn_entity() {
         std::forward_as_tuple(_entity_count)).first).second;
 }
 
+#include <cstdio>
+
 //this WILL be slow. :(
 void Pool::all_sync() {
     for_entity([this](const Entity& e){
@@ -90,6 +92,7 @@ void Pool::all_sync() {
         if (d) {
             if (t) {
                 t->set_pos(d->pos);
+                printf("%f %f %f\n", d->pos.x, d->pos.y, d->pos.z);
             }
             p2d = glm::vec2(d->pos.x, d->pos.z);
         } else if (t) {
