@@ -50,7 +50,7 @@ void init() {
     render::point_lights.back()->specular(glm::vec3(1, 1, 1));
 }
 
-void run() {
-
+void run(double dt, double time) {
+    UNUSED(dt, time);
 }
 }

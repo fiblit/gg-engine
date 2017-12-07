@@ -111,7 +111,7 @@ int main(int, char**) {
     while (!glfwWindowShouldClose(window)) {
         frame_time.tick();
         //FPS recorder
-        if (1 < chrono::duration_cast<chrono::seconds>(frame_time.time() - last_s).count()) {
+        if (1.f < frame_time - last_s) {
             clog << "FPS: " << fps << "\n";
             fps = 0;
             last_s = frame_time.time();
@@ -119,7 +119,8 @@ int main(int, char**) {
             ++fps;
         }
 
-        demo::run();
+        double total_time = frame_time - init_time;
+        demo::run(frame_time.delta_s(), total_time);
         ////AI: iterates over agents, which often depend on boundvolumes, dynamics
         //and transforms.
         ai::update_agents();

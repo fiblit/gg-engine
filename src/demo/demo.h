@@ -3,7 +3,7 @@
 
 namespace demo {
 void init();
-void run();
+void run(double dt, double time);
 }
 
 #endif
