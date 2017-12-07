@@ -92,7 +92,6 @@ void Pool::all_sync() {
         if (d) {
             if (t) {
                 t->set_pos(d->pos);
-                printf("%f %f %f\n", d->pos.x, d->pos.y, d->pos.z);
             }
             p2d = glm::vec2(d->pos.x, d->pos.z);
         } else if (t) {

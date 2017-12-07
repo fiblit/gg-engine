@@ -1,6 +1,7 @@
 #include "demo.h"
 #include "model/CubeMesh.h"
 #include "light/PointLight.h"
+#include "util/debug.h"
 #include "Pool.h"
 #include "render.h"
 
@@ -11,16 +12,17 @@ using namespace std;
 
 namespace demo {
 void init() {
+    string pwd(PROJECT_SRC_DIR);
+
     for (int i = 0; i < 3; ++i) {
         POOL.spawn_entity();
     }
-
-    string pwd(PROJECT_SRC_DIR);
 
     vector<Texture> textures = {
         {render::create_tex(pwd + "/res/container2.png"), Texmap::diffuse},
         {render::create_tex(pwd + "/res/container2_specular.png"), Texmap::specular}
     };
+
     float i = 0;
     POOL.for_entity([&textures, &i](Entity& e){
         //so, normally I'd only want one mesh shared amongst many entities, but the
