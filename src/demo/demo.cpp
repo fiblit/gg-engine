@@ -32,6 +32,9 @@ void init() {
         uint16_t did = POOL.create<Dynamics>(Dynamics());
         auto& d = *POOL.get<Dynamics>(did);
         d.pos = glm::vec3(0, i/2.f, 3.f+2.f*i);
+        d.vel = glm::vec3(0, 0, i);
+        d.force = glm::vec3(0, 0, -i);
+        d.mass = 1;
         ++i;
         //d.vel = glm::vec3(0, 0, i/10);
         POOL.attach<Transform>(e, tid);
