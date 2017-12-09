@@ -87,7 +87,7 @@ void update_agents() {
 
     for (Entity* e : dynamics) {
         auto& a = *POOL.get<Agent>(*e);
-        if (!a.has_plan()) {
+        if (!a.has_plan() || (a.done() && (a.start != a.final_goal))) {
             GMP::plan_one(a);
         }
 

@@ -17,6 +17,8 @@ void simulate(float dt) {
         d.pos += dt * d.vel + 0.5f * dt * dt * half_a;
         d.vel += dt * half_a;
         d.acc = next_a;
+
+        d.force = glm::vec3(0);
     });
 }
 }

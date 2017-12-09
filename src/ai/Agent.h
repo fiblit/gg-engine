@@ -19,6 +19,10 @@ struct Agent {
         return plan != nullptr && static_cast<int>(plan->size()) > 0;
     }
 
+    bool done() {
+        return num_done == static_cast<int>(plan->size());
+    }
+
     //planning meta-data
     Cspace2d* cspace;
     PRM* prm;

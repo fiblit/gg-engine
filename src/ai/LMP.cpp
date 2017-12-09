@@ -2,6 +2,9 @@
 #include "Pool.h"
 #include "BVH.h"
 //#include "debug.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
+#undef GLM_ENABLE_EXPERIMENTAL
 #include <limits>
 
 //TODO: properly polymorph for all BoundingVolumes
@@ -216,14 +219,15 @@ glm::vec2 LMP::calc_sum_force(
     auto& d = *POOL.get<Dynamics>(*e);
     if (a.has_plan()) {
         a.local_goal = LMP::lookahead(a, bv);
-        goal_vel = glm::normalize(a.local_goal - bv._o) * speed /** dt*/;
-        goal_F = 2.0f*(goal_vel - glm::vec2(d.vel.x, d.vel.z));
-    }
-    else {
+        glm::vec2 diff = a.local_goal - bv._o;
+        //prevents overshooting
+        goal_vel = (diff / glm::max(1.f, glm::length(diff))) * speed;
+    } else {
         a.local_goal = bv._o;
         goal_vel = glm::vec2(0);
-        goal_F = glm::vec2(0);
     }
+
+    goal_F = 2.0f*(goal_vel - glm::vec2(d.vel.x, d.vel.z));
 
     float real_speed = glm::length(goal_vel);
 
@@ -271,5 +275,5 @@ glm::vec2 LMP::calc_sum_force(
     }
     */
 
-    return  goal_F + ttc_F;// +boid_F + follow_F;
+    return goal_F + ttc_F;
 }
