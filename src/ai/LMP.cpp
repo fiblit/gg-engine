@@ -209,7 +209,7 @@ glm::vec2 LMP::calc_sum_force(
         BVH* dynamic_bvh,
         std::vector<Entity*>, //statics
         std::vector<Entity*>) {// dynamics) {
-    float speed = 6.0f; // x m/s
+    float speed = 1.0f; // x m/s
     glm::vec2 goal_vel;
     glm::vec2 goal_F(0);
 

@@ -71,6 +71,7 @@ void init(glm::vec<2, int> dims) {
     mtl->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/lit_mtl.frag");
     mtl->build();
     POOL.for_<Mesh>([](Mesh& m, Entity&){
+        //TODO: material as component so entities can set their albedo & shaders
         m.set_material(mtl.get(), 4.0f);
         //TODO:
         //.material(Material(
@@ -98,8 +99,8 @@ void init(glm::vec<2, int> dims) {
     //set up camera
     cam = make_unique<Camera>();
     cam->aspect(static_cast<float>(dims.x / dims.y));
-    cam->set_pos(glm::vec3(0, 0, 0));
-    cam->set_rot(glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+    cam->set_pos(glm::vec3(0, 20, 20));
+    cam->set_rot(glm::vec3(0, -1, -1), glm::vec3(0, 1, 0));
 
     //TODO: Uniform buffer object; see below
     cam->apply_proj(*mtl);
@@ -153,7 +154,7 @@ void input_key(GLFWwindow* w, double ddt) {
     if (ui::key_map[GLFW_KEY_F]) {
         motion += glm::vec3(0, -1, 0);
     }
-    cam->move(motion * dt);
+    cam->move(5.f*motion * dt);
 
     float roll = 0;
     if (ui::key_map[GLFW_KEY_Q]) {
