@@ -1,4 +1,6 @@
 ﻿#include "BoundVolume.h"
+#include <array>
+#include <algorithm>
 
 Rect::Rect()
     : BoundVolume(glm::vec2(0, 0), volume_type::RECT), _w(0), _h(0) {}
@@ -14,9 +16,6 @@ BoundVolume::~BoundVolume() {}
 BoundVolume::BoundVolume() : _o(glm::vec2(0, 0)), _vt(volume_type::CIRC) {}
 BoundVolume::BoundVolume(glm::vec2 o, volume_type vt) : _o(o), _vt(vt) {}
 
-//TODO: rect/circ collision could be simplified via:
-//test if point p is in rect such that p is r along the direction from circle to rect
-//note: "along the direction" is not as simple as it sounds, probably not simpler
 std::vector<BoundVolume*> Circ::minkowski_sum(BoundVolume* bv) {
     if (_vt == volume_type::CIRC) {
         return minkowski_sum_(dynamic_cast<Circ*>(bv));
@@ -123,128 +122,65 @@ bool Rect::collides(glm::vec2 p) {
         && fabs(p.y - _o.y) <= _h / 2;
 }
 
-bool Rect::line_of_sight(glm::vec2 a, glm::vec2 b, glm::vec2 /*Lab*/, float /*len2*/) {
+static bool on_line(float t) {
+    return 0 <= t && t <= 1;
+}
+
+static bool on_ray(float t) {
+    return 0 <= t;
+}
+
+template <bool (f)(float)>
+static float hit_clamp(float t) {
+    return f(t) ? t : std::numeric_limits<float>::max();
+}
+
+static bool hit(float t) {
+    return t < std::numeric_limits<float>::max();
+}
+
+//find (t, s) such that Lo + Ld*t = Mo + Md*s
+static std::pair<float, float> line_intersect(glm::vec2 Lo, glm::vec2 Ld,
+        glm::vec2 Mo, glm::vec2 Md) {
+    glm::vec2 MLo = Mo - Lo;
+    float s = (Ld.x*MLo.y - Ld.y*MLo.x) / (Md.x * Ld.y - Md.y * Ld.x);
+    float t;
+    if (fabs(Ld.x) < 0.00000001) {
+        t = (Mo.y + Md.y * s - Lo.x) / Ld.y;
+    } else {
+        t = (Mo.x + Md.x * s - Lo.x) / Ld.x;
+    }
+    return {t, s};
+}
+
+bool Rect::line_of_sight(glm::vec2 Ro, glm::vec2 Rd, glm::vec2 /*Lab*/, float /*len2*/) {
     //float t = intersect(b, Lab/sqrt(len2));//the intersect for axis aligned is actually pretty fast
     //return t*t > len2;
 
-    float left = _o.x - _w / 2;
-    float right = _o.x + _w / 2;
-    float top = _o.y + _h / 2;
-    float bottom = _o.y - _h / 2;
+    //dims
+    float l = _o.x - _w / 2;
+    float r = _o.x + _w / 2;
+    float t = _o.y + _h / 2;
+    float b = _o.y - _h / 2;
+    //corners
+    glm::vec2 bl(l, b);
+    glm::vec2 br(r, b);
+    glm::vec2 tl(l, t);
+    glm::vec2 tr(r, t);
 
-    return !(line_axial_line_collide(a, b, left, 0, bottom, top)
-        || line_axial_line_collide(a, b, right, 0, bottom, top)
-        || line_axial_line_collide(a, b, bottom, 1, left, right)
-        || line_axial_line_collide(a, b, top, 1, left, right));
-}
+    std::array<std::pair<glm::vec2, glm::vec2>, 4> edges =
+        {std::make_pair(tr, tl),
+        std::make_pair(br, tr),
+        std::make_pair(bl, br),
+        std::make_pair(tl, bl)};
 
-//TODO: fix, so I can rotate rects
-//deprecated
-bool Rect::line_segs_collide(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4) {
-    glm::vec2 pp[4] = { p1, p2, p3, p4 };
-    glm::vec3 l[2], p[4], x;
-
-    for (int i = 0; i < 4; i++)
-        p[i] = glm::vec3(pp[i].x, pp[i].y, 1);
-
-    l[0] = glm::cross(p[0], p[1]);
-    l[1] = glm::cross(p[2], p[3]);
-    x = glm::cross(l[0], l[1]);
-    glm::vec2 px;
-    px.x = x.x / x.z;
-    px.y = x.y / x.z;
-
-    float len2l1 = (l[0].y * l[0].y) + (l[0].x * l[0].x);
-    float len2l2 = (l[1].y * l[1].y) + (l[1].x * l[1].x);
-
-    glm::vec2 pp2x[4];
-    for (int i = 0; i < 4; i++)
-        pp2x[i] = px - pp[i];
-    for (int i = 0; i < 2; i++)
-        if (glm::dot(pp2x[i], pp2x[i]) > len2l1)
-            return false;//miss
-    for (int i = 2; i < 4; i++)
-        if (glm::dot(pp2x[i], pp2x[i]) > len2l2)
-            return false;//miss
-
-    return true;//must have hit
-}
-bool Rect::line_axial_line_collide(glm::vec2 pp1, glm::vec2 pp2, float val,
-        int axis, float oValLo, float oValHi) {
-    glm::vec3 l = glm::cross(glm::vec3(pp1, 1), glm::vec3(pp2, 1));
-    //ax+by+circ = 0
-
-    //vertical
-    if (axis == 0) {// (1/val)*x + 0*y - 1 = 0 // x = val
-        float yint = (-l[0] * val - l[2]) / l[1];
-        //val line hits lineseg
-        return ((pp1.x <= val && val <= pp2.x) || (pp2.x <= val && val <= pp1.x))
-            //intersection on axial segment
-            && (oValLo <= yint && yint <= oValHi);
-    }
-    //horizontal
-    else {//if (axis == 1) {// 0x + (1/val)*y - 1 = 0 // y =val
-        float xint = (-l[1] * val - l[2]) / l[0];
-        //axial line hits line seg
-        return ((pp1.y <= val && val <= pp2.y) || (pp2.y <= val && val <= pp1.y))
-            //intersection on axial segment
-            && (oValLo <= xint && xint <= oValHi);
-    }
-}
-
-static float ray_axial_line_intersect(glm::vec2 po, glm::vec2 pv, float val,
-        int axis, float oValLo, float oValHi){
-    //https://rootllama.wordpress.com/2014/06/20/ray-line-segment-intersection-test-in-2d/
-    glm::vec2 q, s;
-    if (axis == 0) {//vert
-        q = glm::vec2(val, oValLo);
-        s = glm::vec2(0, oValHi - oValLo);
-    }
-    else {
-        q = glm::vec2(oValLo, val);
-        s = glm::vec2(oValHi - oValLo, 0);
-    }
-    glm::vec2 v1 = po - q;
-    glm::vec2 v2 = s - q;
-    glm::vec2 v3(-pv.y, pv.x);
-    float dot = glm::dot(v2, v3);
-    if (fabs(dot) > 0) {
-        float t1 = (v2.x * v1.y - v2.y * v1.x) / dot;
-        float t2 = glm::dot(v1, v3) / dot;
-        if (t1 >= 0 && 0 <= t2 && t2 <= 1)
-            return t1;
-        else
-            return std::numeric_limits<float>::max();
-    }
-    else
-        return std::numeric_limits<float>::max();
-
-
-    //http://stackoverflow.com/questions/14307158/ ...
-    //how-do-you-check-for-intersection-between-a-line-segment-and-a-line-ray-emanatin
-    //http://stackoverflow.com/questions/563198/ ...
-    //how-do-you-detect-where-two-line-segments-intersect/565282#565282
-    /*glm::vec2 p = po;
-    glm::vec2 r = pv;
-    //v x w = vx wy − vy wx
-    //t = (q − p) × s / (r × s)
-    //u = (q − p) × r / (r × s)
-    glm::vec2 qp = q - p;
-    float rxs = r.x * s.y - r.y * s.x;
-    float qpxs = qp.x * s.y - qp.y * s.x;
-    float qpxr = qp.x * r.y - qp.y * r.x;
-    float e = 0.0000001;
-    if (abs(rxs) < e) {
-        return std::numeric_limits<float>::max();
-    }
-    else {
-        float t = qpxs / rxs;
-        float u = qpxr / rxs;
-        if (0 <= t && 0 <= u && u <= 1)
-            return t;
-        else
-            return std::numeric_limits<float>::max();
-    }*/
+    return std::none_of(edges.cbegin(), edges.cend(),
+        [Ro, Rd](std::pair<glm::vec2, glm::vec2> edge) {
+            auto&& result = line_intersect(Ro, Rd,
+                edge.second, edge.first - edge.second);
+            return hit(hit_clamp<on_line>(result.second))
+                && hit(hit_clamp<on_ray>(result.first));
+        });
 }
 
 //assumes axis alignment
@@ -252,54 +188,31 @@ float Rect::intersect(glm::vec2 bo, glm::vec2 v) {
     if (collides(bo))
         return 0;
 
-    float left = _o.x - _w / 2;
-    float right = _o.x + _w / 2;
-    float top = _o.y + _h / 2;
-    float bottom = _o.y - _h / 2;
+    //dims
+    float l = _o.x - _w / 2;
+    float r = _o.x + _w / 2;
+    float t = _o.y + _h / 2;
+    float b = _o.y - _h / 2;
+    //corners
+    glm::vec2 bl(l, b);
+    glm::vec2 br(r, b);
+    glm::vec2 tl(l, t);
+    glm::vec2 tr(r, t);
 
-    float t = std::numeric_limits<float>::max();
-    float possible = ray_axial_line_intersect(bo, v, left, 0, bottom, top);
-    if (possible < t) t = possible;
-    possible = ray_axial_line_intersect(bo, v, right, 0, bottom, top);
-    if (possible < t) t = possible;
-    possible = ray_axial_line_intersect(bo, v, bottom, 1, left, right);
-    if (possible < t) t = possible;
-    possible = ray_axial_line_intersect(bo, v, top, 1, left, right);
-    if (possible < t) t = possible;
+    std::array<std::pair<glm::vec2, glm::vec2>, 4> edges =
+        {std::make_pair(tr, tl),
+        std::make_pair(br, tr),
+        std::make_pair(bl, br),
+        std::make_pair(tl, bl)};
 
-    return t;
-    /*
-    glm::vec2 d_o = bo - _o;
-
-    float t_x_hi = (_w - d_o.x) / v.x;
-    float t_y_hi = (_h - d_o.y) / v.y;
-
-    float t_x_lo = (-_w - d_o.x) / v.x;
-    float t_y_lo = (-_h - d_o.y) / v.y;
-
-    if (t_x_hi > t_x_lo) {
-        float t = t_x_hi;
-        t_x_hi = t_x_lo;
-        t_x_lo = t_x_hi;
+    //find closest edge
+    float p = std::numeric_limits<float>::max();
+    for (auto& pair : edges) {
+        auto&& edge = line_intersect(bo, v,
+            pair.second, pair.first - pair.second);
+        if (hit(hit_clamp<on_line>(edge.second))) {
+            p = hit_clamp<on_ray>(edge.first);
+        }
     }
-    if (t_y_hi > t_y_lo) {
-        float t = t_y_hi;
-        t_y_hi = t_y_lo;
-        t_y_lo = t_y_hi;
-    }
-
-    //no intersection forward or back
-    if (t_x_hi < t_y_lo || t_x_lo > t_y_hi)
-        return std::numeric_limits<float>::max();
-    else {
-        float t_lo = (t_x_lo > t_y_lo ? t_x_lo : t_y_lo);
-        float t_hi = (t_x_hi > t_y_hi ? t_x_hi : t_y_hi);
-        if (t_hi < 0)//intersection before ray
-            return std::numeric_limits<float>::max();
-        else if (t_lo < 0)
-            return 0; //intersection current
-        else
-            return t_lo;
-    }
-    */
+    return p;
 }
