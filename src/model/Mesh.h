@@ -39,6 +39,7 @@ protected:
     void gen();
     void bind();
     void bind_textures();
+    void unbind_textures();
     void attrib();
     void buffer();
 
@@ -51,7 +52,12 @@ protected:
     GLuint vao;
     GLuint vbo;
     GLuint ibo;
+
     Shader* mtl;
+    float _shininess;
+    glm::vec3 _ambient;
+    glm::vec3 _diffuse;
+    glm::vec3 _specular;
 };
 
 #endif //MESH_H
