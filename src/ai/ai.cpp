@@ -41,13 +41,13 @@ void init() {
 
         //prm
         glm::vec2 center_2d(0, 0);//org
-        glm::vec2 dim(20/2, 20/2);//w,h
+        glm::vec2 dim(50/2, 50/2);//w,h
         dim *= 1;//cellsize
         std_prm = new PRM(
             std::move(cs),
-            root2,
+            root2 * 12.f,
             0.f,
-            glm::vec2(1.f, 1.f),
+            glm::vec2(3.f, 3.f),
             1,
             center_2d - dim,
             center_2d + dim,
