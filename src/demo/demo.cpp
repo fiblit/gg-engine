@@ -48,8 +48,8 @@ static void create_wall(Entity& e, vector<Texture> texs, glm::vec2 pos, float h)
     POOL.attach<BoundVolume*>(e, bvid);
 }
 
-constexpr unsigned NUM_ROBOS = 10;
-constexpr unsigned NUM_WALLS = 40;
+constexpr unsigned NUM_ROBOS = 1000;
+constexpr unsigned NUM_WALLS = 100;
 constexpr float rot_s = 0;//sin(1.f/NUM_ROBOS * glm::pi<float>());
 constexpr float rot_c = 1;//cos(1.f/NUM_ROBOS * glm::pi<float>());
 constexpr float rot_robo[4] = {rot_c, -rot_s, rot_s, rot_c};
@@ -99,19 +99,27 @@ void init() {
 
     Entity* robos[NUM_ROBOS];
     float j = 0, k = 0;
-    //for (unsigned i = 0; i < NUM_ROBOS; ++i) {
-    //    robos[i] = &POOL.spawn_entity();
-    //    //float rad = static_cast<float>(i)/NUM_ROBOS * (2.f * glm::pi<float>());
-    //    create_robo(*robos[i], textures, glm::vec2(k/4.f-40, j));
-    //    ++k;
-    //    if (k > 10) {k = 0; ++j;}
-    //}
-    //j = 0; k = 0;
-    for (unsigned i = 0; i < NUM_ROBOS; ++i) {
+    for (unsigned i = 0; i < NUM_ROBOS/2; ++i) {
         robos[i] = &POOL.spawn_entity();
-        create_robo(*robos[i], textures, glm::vec2(k/2.f-10, j/3.f-20));
-        ++k;
-        if (k > 40) {k = 0; ++j;}
+        //float rad = static_cast<float>(i)/NUM_ROBOS * (2.f * glm::pi<float>());
+        if (i%2) {
+            create_robo(*robos[i], textures, glm::vec2(-k-35, j-10));
+            ++j;
+            if (j > 20) {j = 0; ++k;}
+        } else {
+            create_robo(*robos[i], textures, glm::vec2(k+35, j - 10));
+        }
+    }
+    j = 0; k = 0;
+    for (unsigned i = NUM_ROBOS/2; i < NUM_ROBOS; ++i) {
+        robos[i] = &POOL.spawn_entity();
+        if (i%2) {
+            create_robo(*robos[i], textures, glm::vec2(k-10, -j-35));
+            ++k;
+            if (k > 20) {k = 0; ++j;}
+        } else {
+            create_robo(*robos[i], textures, glm::vec2(k-10, j+35));
+        }
     }
 
     Seeder s;
@@ -126,26 +134,26 @@ void init() {
             tall(s.gen()));
     }
 
-    render::dir_lights.push_back(make_unique<DirLight>());
-    render::dir_lights.back()->dir(glm::vec3(-1, -5, -1));
-    render::dir_lights.back()->ambient(glm::vec3(.1f));
-    render::dir_lights.back()->diffuse(glm::vec3(1.f));
-    render::dir_lights.back()->specular(glm::vec3(1.f));
+    {
+        render::dir_lights.push_back(make_unique<DirLight>());
+        render::dir_lights.back()->dir(glm::vec3(-1, -2, -1));
+        render::dir_lights.back()->ambient(glm::vec3(.1f));
+        render::dir_lights.back()->diffuse(glm::vec3(.5f));
+        render::dir_lights.back()->specular(glm::vec3(1.f));
+    }
 
-/*
     UFD y_dist(3, 10);
-    UFD tweak(-.1f, .1f);
+    UFD tweak(-.3f, .3f);
     for (unsigned i = 0; i < 8; ++i) {
         render::point_lights.push_back(make_unique<PointLight>());
         render::point_lights.back()->pos(glm::vec3(
             map(s.gen()), y_dist(s.gen()), map(s.gen())));
-        render::point_lights.back()->att_to_dist(100);
+        render::point_lights.back()->att_to_dist(1000);
         render::point_lights.back()->ambient(glm::vec3(0.f));
-        render::point_lights.back()->diffuse(glm::vec3(.9f)
+        render::point_lights.back()->diffuse(glm::vec3(.5f)
             + glm::vec3(tweak(s.gen()), tweak(s.gen()), tweak(s.gen())));
         render::point_lights.back()->specular(glm::vec3(1.f));
     }
-*/
 }
 
 void run(double dt, double time) {
