@@ -20,7 +20,7 @@ struct Agent {
     }
 
     bool done() {
-        return num_done == static_cast<int>(plan->size());
+        return has_plan() && num_done == static_cast<int>(plan->size());
     }
 
     //planning meta-data

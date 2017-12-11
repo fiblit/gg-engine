@@ -60,7 +60,7 @@ void init() {
             a.cspace = std_cspace;
             a.prm = std_prm;
             a.local_goal = glm::vec2(0, 0);
-            GMP::plan_one(a);
+            a.plan = nullptr;
         }
     }
 }
