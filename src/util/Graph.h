@@ -32,6 +32,9 @@ public:
 
     void for_vertex(std::function<void(NodeId)> f);
     void for_edge(std::function<void(NodeId, NodeId)> f);
+
+    size_t vertex_num();
+    size_t edge_num();
 private:
     std::unordered_map<NodeId, T> _vertices;
     std::unordered_map<NodeId, Nodes> _edges;
@@ -85,7 +88,7 @@ inline std::optional<T> Graph<T>::data(const NodeId& v) {
 #else
 inline std::experimental::optional<T> Graph<T>::data(const NodeId& v) {
 #endif
-    if (_edges.count(v)) {
+    if (_vertices.count(v)) {
         return _vertices[v];
     } else {
         return {};
@@ -106,6 +109,16 @@ inline void Graph<T>::for_edge(std::function<void(NodeId, NodeId)> f) {
             f(from.first, to);
         }
     }
+}
+
+template <class T>
+inline size_t Graph<T>::vertex_num() {
+    return _vertices.size();
+}
+
+template <class T>
+inline size_t Graph<T>::edge_num() {
+    return _edges.size();
 }
 
 #endif//GRAPH_H
