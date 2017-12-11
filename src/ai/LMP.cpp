@@ -94,12 +94,13 @@ glm::vec2 LMP::lookahead(Agent& a, BoundVolume& bv) {
     return t_new;
 }
 
+const double TTC_THRESHOLD = 5.0;
 glm::vec2 LMP::ttc_forces_(double ttc, glm::vec2 dir) {
     float len = glm::length(dir);
     if (fabs(len) > 0.000000001)
         dir /= len;
 
-    double t_h = 5.0;//seconds
+    double t_h = TTC_THRESHOLD;//seconds
     double mag = 0;
     if (ttc >= 0 && ttc <= t_h)
         mag = (t_h - ttc) / (ttc + 0.001);
@@ -229,11 +230,16 @@ glm::vec2 LMP::calc_sum_force(
 
     goal_F = 2.0f*(goal_vel - glm::vec2(d.vel.x, d.vel.z));
 
-    float real_speed = glm::length(goal_vel);
+    float real_speed = glm::length(d.vel);
 
     /* ttc - approximate */
     glm::vec2 ttc_F(0);
-    Circ q(bv._o, real_speed * 5);
+    //keeping this small is very important for framerate; at some point I'll
+    //have to replace this circle with an extrusion or cone. ... or a shifted
+    //circle! this works pretty damn well! 1000 Agents at 30FPS!! :D
+    glm::vec2 vel2d(d.vel.x, d.vel.z);
+    Circ q(bv._o + vel2d*.5f, real_speed * .5f * static_cast<float>(TTC_THRESHOLD));
+
     std::vector<Entity*> NNdynamic = dynamic_bvh->query(&q);
     for (Entity* nearby : NNdynamic) {
         Agent* b = POOL.get<Agent>(*nearby);
@@ -245,7 +251,7 @@ glm::vec2 LMP::calc_sum_force(
         }
         double ttc = LMP::ttc(bv, glm::vec2(d.vel.x, d.vel.z),
             bbv, glm::vec2(bd.vel.x, bd.vel.z));
-        if (ttc > 4) {//seconds
+        if (ttc > TTC_THRESHOLD) {//seconds
             continue;
         }
         ttc_F += LMP::ttc_forces(d, bv, bd, bbv, static_cast<float>(ttc));
@@ -256,7 +262,7 @@ glm::vec2 LMP::calc_sum_force(
         BoundVolume& bbv = **POOL.get<BoundVolume*>(*nearby);
         double ttc = LMP::ttc(bv, glm::vec2(d.vel.x, d.vel.z),
             bbv, glm::vec2(0));
-        if (ttc > 4) {//seconds
+        if (ttc > TTC_THRESHOLD) {//seconds
             continue;
         }
         ttc_F += ttc_forces(d, bv, bbv, static_cast<float>(ttc));
