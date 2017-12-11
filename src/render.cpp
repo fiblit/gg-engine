@@ -4,6 +4,7 @@
 #include "light/PointLight.h"
 #include "light/DirLight.h"
 #include "light/SpotLight.h"
+#include "model/LineMesh.h"
 #include "model/CubeMesh.h"
 #include "io.h"
 #include "ui.h"
@@ -70,9 +71,15 @@ void init(glm::vec<2, int> dims) {
     mtl->add(GL_VERTEX_SHADER, pwd + "/res/glsl/tex.vert");
     mtl->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/lit_mtl.frag");
     mtl->build();
-    POOL.for_<Mesh>([](Mesh& m, Entity&){
+
+    POOL.for_<Mesh>([&](Mesh& m, Entity&){
         //TODO: material as component so entities can set their albedo & shaders
-        m.set_material(mtl.get(), 4.0f);
+        if (m._type == Mesh::Type::LINE) {
+            //LineMesh& l = m;
+            m.set_material(mtl.get(), 0, glm::vec3(0, 100, 0));
+        } else {
+            m.set_material(mtl.get(), 32);
+        }
         //TODO:
         //.material(Material(
         //  shader,
@@ -133,7 +140,12 @@ void draw() {
             mtl->set("model", glm::mat4(1.f));
         }
         //update models _and_ do glDraw; this combination seems to cause issues.
-        m.draw();
+        if (m._type == Mesh::Type::LINE) {
+            LineMesh l = m;
+            l.draw();
+        } else {
+            m.draw();
+        }
     });
 }
 

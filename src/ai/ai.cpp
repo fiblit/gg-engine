@@ -1,5 +1,7 @@
 #include "ai.h"
 #include "Pool.h"
+#include "model/CubeMesh.h"
+#include "model/LineMesh.h"
 
 namespace ai {
 Cspace2d* std_cspace;
@@ -45,13 +47,51 @@ void init() {
         dim *= 1;//cellsize
         std_prm = new PRM(
             std::move(cs),
-            root2 * 12.f,
+            root2*6.f,
             0.f,
             glm::vec2(3.f, 3.f),
-            1,
+            2,
             center_2d - dim,
             center_2d + dim,
-            .1f);//1.f
+            1.f);//1.f
+
+        #ifdef PRM_DEBUG
+        auto& rm = std_prm->_roadmap;
+        std::vector<Vertex> endpoints(rm->vertex_num());
+        std::vector<GLuint> lines(2 * rm->edge_num());
+
+        rm->for_vertex([&](NodeId u) {
+            Entity& v = POOL.spawn_entity();
+            uint16_t tid = POOL.create<Transform>(Transform(nullptr));
+            std::vector<Texture> tex = {};
+            uint16_t mid = POOL.create<Mesh>(CubeMesh(tex));
+            glm::vec2 v_pos = *rm->data(u);
+            auto& t = *POOL.get<Transform>(tid);
+            glm::mat4 scale(.3f);
+            scale[3][3] = 1.f;
+            t.set_mat(scale);
+            t.set_pos(glm::vec3(v_pos.x, 0, v_pos.y));
+            POOL.attach<Transform>(v, tid);
+            POOL.attach<Mesh>(v, mid);
+
+            glm::vec3 pos(v_pos.x, 0, v_pos.y);
+            Vertex end;
+            end.pos = pos;
+            end.norm = glm::vec3(0);
+            end.tex = glm::vec2(0);
+            endpoints[u] = end;
+        });
+
+        rm->for_edge([&](NodeId u, NodeId v) {
+            lines.push_back(u);
+            lines.push_back(v);
+        });
+        {
+            Entity& debug_map = POOL.spawn_entity();
+            uint16_t mid = POOL.create<Mesh>(LineMesh(endpoints, lines));
+            POOL.attach<Mesh>(debug_map, mid);
+        }
+        #endif
 
         //planners
         for (Entity* e : dynamics) {

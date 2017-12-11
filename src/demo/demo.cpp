@@ -127,11 +127,12 @@ void init() {
     }
 
     render::dir_lights.push_back(make_unique<DirLight>());
-    render::dir_lights.back()->dir(glm::vec3(-1, -1, -1));
+    render::dir_lights.back()->dir(glm::vec3(-1, -5, -1));
     render::dir_lights.back()->ambient(glm::vec3(.1f));
     render::dir_lights.back()->diffuse(glm::vec3(1.f));
     render::dir_lights.back()->specular(glm::vec3(1.f));
 
+/*
     UFD y_dist(3, 10);
     UFD tweak(-.1f, .1f);
     for (unsigned i = 0; i < 8; ++i) {
@@ -140,10 +141,11 @@ void init() {
             map(s.gen()), y_dist(s.gen()), map(s.gen())));
         render::point_lights.back()->att_to_dist(100);
         render::point_lights.back()->ambient(glm::vec3(0.f));
-        render::point_lights.back()->diffuse(glm::vec3(.5f)
+        render::point_lights.back()->diffuse(glm::vec3(.9f)
             + glm::vec3(tweak(s.gen()), tweak(s.gen()), tweak(s.gen())));
         render::point_lights.back()->specular(glm::vec3(1.f));
     }
+*/
 }
 
 void run(double dt, double time) {

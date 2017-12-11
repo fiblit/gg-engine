@@ -29,12 +29,18 @@ public:
     Mesh(const std::vector<Vertex>& vertices,
         const std::vector<GLuint>& indices,
         const std::vector<Texture>& textures);
-    void set_material(Shader* material, float shininess,
+    virtual void set_material(Shader* material, float shininess,
         glm::vec3 ambient = glm::vec3(0),
         glm::vec3 diffuse = glm::vec3(0),
         glm::vec3 specular = glm::vec3(0));
-    void draw();
-protected:
+    virtual void draw();
+
+    virtual ~Mesh();
+
+    enum class Type {ANY, CUBE, LINE};
+    Type _type;
+
+//protected:
     //helpers
     void gen();
     void bind();

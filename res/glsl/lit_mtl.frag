@@ -102,7 +102,7 @@ vec3 shade_blinn_phong(vec3 to_L, vec3 norm, vec3 view_dir, Color unlit,
         Color light) {
     float diffuse = max(0.0, dot(norm, to_L));
     vec3 half_dir = normalize(view_dir + to_L);
-    float specular = max(0.0, pow(max(0.0, dot(norm, half_dir)), 
+    float specular = max(0.0, pow(max(0.0, dot(norm, half_dir)),
         material.shininess));
 
     vec3 lit = vec3(0,0,0);
@@ -123,8 +123,8 @@ vec3 shade_PointLight(PointLight pl, vec3 norm, vec3 view_dir, Color unlit) {
         pl.color);
 
     float l_dist = length(to_L);
-    float attenuation = 1.0 / 
-        (pl.att_k 
+    float attenuation = 1.0 /
+        (pl.att_k
         + pl.att_x * l_dist
         + pl.att_x2 * l_dist * l_dist);
     return lit * attenuation;

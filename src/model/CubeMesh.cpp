@@ -60,4 +60,5 @@ const std::vector<GLuint> idxs = {
 
 CubeMesh::CubeMesh(std::vector<Texture>& texs)
         : Mesh(verts, idxs, texs) {
+    _type = Type::CUBE;
 }

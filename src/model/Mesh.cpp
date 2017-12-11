@@ -15,6 +15,11 @@ Mesh::Mesh(const vector<Vertex>& verts,
     attrib();//expect the data to be like this
     buffer();//here is some (static) data; different for skinning
     glBindVertexArray(0);
+
+    _type = Type::ANY;
+}
+
+Mesh::~Mesh() {
 }
 
 void Mesh::gen() {
