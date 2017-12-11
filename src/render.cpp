@@ -83,6 +83,7 @@ void init(glm::vec<2, int> dims) {
      });
 
     //send (static) lights to shader(s)
+    mtl->use();
     mtl->set("n_dir_lights", static_cast<GLint>(dir_lights.size()));
     for (size_t i = 0; i < dir_lights.size(); ++i) {
         dir_lights[i]->pass_to(*mtl, "dir_lights[" + to_string(i) + "].");
