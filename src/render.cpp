@@ -125,8 +125,12 @@ void draw() {
     //TODO: dynamic lighting
 
     POOL.for_<Mesh>([&](Mesh& m, Entity& e){
-        auto& t = *POOL.get<Transform>(e);
-        mtl->set("model", t.global_mat());
+        auto t = POOL.get<Transform>(e);
+        if (t) {
+            mtl->set("model", t->global_mat());
+        } else {
+            mtl->set("model", glm::mat4(1.f));
+        }
         //update models _and_ do glDraw; this combination seems to cause issues.
         m.draw();
     });
