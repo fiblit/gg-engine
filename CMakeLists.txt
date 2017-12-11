@@ -102,6 +102,17 @@ add_definitions(
     -DGLFW_INCLUDE_NONE
     -DPROJECT_SRC_DIR=\"${PROJECT_SOURCE_DIR}\"
 )
+
+option(STOP_COLLISION "Turn collision checks on during physics pass" OFF)
+if(STOP_COLLISION)
+    add_definitions(-DSTOP_COLLISION)
+endif()
+
+option(PRM_DEBUG "Turn debug LineMesh on for PRM" OFF)
+if(PRM_DEBUG)
+    add_definitions(-DSTOP_COLLISION)
+endif()
+
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
     add_definitions(-DDEBUG)
 endif()
