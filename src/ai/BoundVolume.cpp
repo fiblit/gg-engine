@@ -17,10 +17,10 @@ BoundVolume::BoundVolume() : _o(glm::vec2(0, 0)), _vt(volume_type::CIRC) {}
 BoundVolume::BoundVolume(glm::vec2 o, volume_type vt) : _o(o), _vt(vt) {}
 
 std::vector<BoundVolume*> Circ::minkowski_sum(BoundVolume* bv) {
-    if (_vt == volume_type::CIRC) {
+    if (bv->_vt == volume_type::CIRC) {
         return minkowski_sum_(dynamic_cast<Circ*>(bv));
     }
-    if (_vt == volume_type::RECT) {
+    if (bv->_vt == volume_type::RECT) {
         return minkowski_sum_(dynamic_cast<Rect*>(bv));
     }
     return std::vector<BoundVolume*>();
@@ -42,10 +42,10 @@ std::vector<BoundVolume*> Circ::minkowski_sum_(Rect* b) {
 }
 
 std::vector<BoundVolume*> Rect::minkowski_sum(BoundVolume* bv) {
-    if (_vt == volume_type::CIRC) {
+    if (bv->_vt == volume_type::CIRC) {
         return minkowski_sum_(dynamic_cast<Circ*>(bv));
     }
-    if (_vt == volume_type::RECT) {
+    if (bv->_vt == volume_type::RECT) {
         return minkowski_sum_(dynamic_cast<Rect*>(bv));
     }
     return std::vector<BoundVolume*>();
