@@ -209,7 +209,7 @@ float Rect::intersect(glm::vec2 bo, glm::vec2 v) {
         auto&& edge = line_intersect(bo, v,
             pair.second, pair.first - pair.second);
         if (hit(hit_clamp<on_line>(edge.second))) {
-            p = hit_clamp<on_ray>(edge.first);
+            p = std::min(p, hit_clamp<on_ray>(edge.first));
         }
     }
     return p;
