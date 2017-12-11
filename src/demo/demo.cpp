@@ -89,13 +89,20 @@ void init() {
     string pwd(PROJECT_SRC_DIR);
     //so, normally I'd only want one mesh shared amongst many entities, but the
     //renderer does a for_<Mesh> so I can't do that.
-     vector<Texture> textures = {
+    vector<Texture> robo_tex = {
         {render::create_tex(pwd + "/res/container2.png"), Texmap::diffuse},
         {render::create_tex(pwd + "/res/container2_specular.png"), Texmap::specular}
     };
+    vector<Texture> floor_tex = {
+        {render::create_tex(pwd + "/res/stone.jpg"), Texmap::diffuse}
+    };
+    vector<Texture> wall_tex = {
+        {render::create_tex(pwd + "/res/rust.jpg"), Texmap::diffuse},
+        {render::create_tex(pwd + "/res/rust.jpg"), Texmap::specular}
+    };
 
     Entity& floors = POOL.spawn_entity();
-    create_floor(floors, textures);
+    create_floor(floors, floor_tex);
 
     Entity* robos[NUM_ROBOS];
     float j = 0, k = 0;
@@ -103,22 +110,22 @@ void init() {
         robos[i] = &POOL.spawn_entity();
         //float rad = static_cast<float>(i)/NUM_ROBOS * (2.f * glm::pi<float>());
         if (i%2) {
-            create_robo(*robos[i], textures, glm::vec2(-k-35, j-10));
+            create_robo(*robos[i], robo_tex, glm::vec2(-k-35, j-10));
             ++j;
             if (j > 20) {j = 0; ++k;}
         } else {
-            create_robo(*robos[i], textures, glm::vec2(k+35, j - 10));
+            create_robo(*robos[i], robo_tex, glm::vec2(k+35, j - 10));
         }
     }
     j = 0; k = 0;
     for (unsigned i = NUM_ROBOS/2; i < NUM_ROBOS; ++i) {
         robos[i] = &POOL.spawn_entity();
         if (i%2) {
-            create_robo(*robos[i], textures, glm::vec2(k-10, -j-35));
+            create_robo(*robos[i], robo_tex, glm::vec2(k-10, -j-35));
             ++k;
             if (k > 20) {k = 0; ++j;}
         } else {
-            create_robo(*robos[i], textures, glm::vec2(k-10, j+35));
+            create_robo(*robos[i], robo_tex, glm::vec2(k-10, j+35));
         }
     }
 
@@ -129,7 +136,7 @@ void init() {
     UFD tall(1.f, 3.f);
     UFD map(-25.f, 25.f);
     for (unsigned i = 0; i < NUM_WALLS; ++i) {
-        create_wall(POOL.spawn_entity(), textures,
+        create_wall(POOL.spawn_entity(), wall_tex,
             glm::vec2(map(s.gen()), map(s.gen())),
             tall(s.gen()));
     }
