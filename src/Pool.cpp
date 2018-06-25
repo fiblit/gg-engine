@@ -1,6 +1,11 @@
 #include "Pool.h"
+#ifdef _WIN32
+#define WIN32
+#endif
 
+#ifndef WIN32
 using namespace std::experimental;
+#endif
 
 Pool POOL;
 
@@ -16,7 +21,7 @@ uint16_t DataTable<T>::create(T&& t) {
     ++_count;
     _table.emplace(std::piecewise_construct,
         std::forward_as_tuple(_count),
-        std::forward_as_tuple(0, std::move(t))); 
+        std::forward_as_tuple(0, std::move(t)));
     return _count;
 }
 
@@ -35,7 +40,11 @@ void DataTable<T>::attach(uint16_t id, uint16_t e) {
 }
 
 template <typename T>
+#ifdef WIN32
+std::optional<uint16_t> DataTable<T>::other(uint16_t id) {
+#else
 optional<uint16_t> DataTable<T>::other(uint16_t id) {
+#endif
     auto v = _table.find(id);
     if (id == 0 || v == _table.end()) {
         return nullopt;
@@ -60,7 +69,7 @@ Pool::Pool()
     _agent_table() {
 }
 
-const Entity& Pool::spawn_entity() {
+Entity& Pool::spawn_entity() {
     ++_entity_count;
     //I "love" C++ sometimes; fucking piece of convoluted shit.
     //Anyways, this next line creates the Entity in place at _entity_count in
@@ -69,6 +78,8 @@ const Entity& Pool::spawn_entity() {
         std::forward_as_tuple(_entity_count),
         std::forward_as_tuple(_entity_count)).first).second;
 }
+
+#include <cstdio>
 
 //this WILL be slow. :(
 void Pool::all_sync() {
@@ -101,12 +112,12 @@ void Pool::for_entity(std::function<void(Entity&)> f) {
     }
 }
 
-template <typename T> DataTable<T> Pool::_table() {throw;}
-template<> DataTable<Transform> Pool::_table<Transform>() {return _transform_table;}
-template<> DataTable<Mesh> Pool::_table<Mesh>() {return _mesh_table;}
-template<> DataTable<Dynamics> Pool::_table<Dynamics>() {return _dynamics_table;}
-template<> DataTable<BoundVolume*> Pool::_table<BoundVolume*>() {return _bound_volume_table;}
-template<> DataTable<Agent> Pool::_table<Agent>() {return _agent_table;}
+template <typename T> DataTable<T>& Pool::_table() {throw;}
+template<> DataTable<Transform>& Pool::_table<Transform>() {return _transform_table;}
+template<> DataTable<Mesh>& Pool::_table<Mesh>() {return _mesh_table;}
+template<> DataTable<Dynamics>& Pool::_table<Dynamics>() {return _dynamics_table;}
+template<> DataTable<BoundVolume*>& Pool::_table<BoundVolume*>() {return _bound_volume_table;}
+template<> DataTable<Agent>& Pool::_table<Agent>() {return _agent_table;}
 
 template <typename T> unsigned Pool::_comp() {throw;}
 template <> unsigned Pool::_comp<Transform>() {return 0;}

@@ -102,12 +102,27 @@ add_definitions(
     -DGLFW_INCLUDE_NONE
     -DPROJECT_SRC_DIR=\"${PROJECT_SOURCE_DIR}\"
 )
+
+option(STOP_COLLISION "Turn collision checks on during physics pass" OFF)
+if(STOP_COLLISION)
+    add_definitions(-DSTOP_COLLISION)
+endif()
+
+option(PRM_DEBUG "Turn debug LineMesh on for PRM" OFF)
+if(PRM_DEBUG)
+    add_definitions(-DSTOP_COLLISION)
+endif()
+
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
     add_definitions(-DDEBUG)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /std:c++latest")
+    #Do not use warnings in MSVC because they are typically != to gcc/clang's.
+    #Normally more warnings is always better, but I don't enforce Windows
+    #compatability enough to care about its warnings. :( Also, I don't have a
+    #clean way of ignoring warnings from /lib files.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0 /std:c++latest")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     #alternate for clang & gcc: -Wall -Wextra -pedantic -std=c++17 -Werror

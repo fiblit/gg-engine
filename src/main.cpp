@@ -1,15 +1,22 @@
-#ifdef _WIN32
+#ifdef WIN32
     //avoid including <windows.h> in glad
     #define APIENTRY __stdcall
 #endif
 #include <glad.h>
 #ifdef _WINDOWS_
-    #error windows.h included
+    #error windows.h was included
+#endif
+#ifdef WIN32
+    #undef near
+    #undef far
+    #define NOMINMAX
 #endif
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
+#include <cstdint>
 
 #include "util/Timer.h"
 #include "render.h"
@@ -19,6 +26,9 @@
 //TOOD: move physics into its own directory :p
 #include "ai/physics.h"
 #include "Pool.h"
+#include "util/debug.h"
+
+#include "demo/demo.h"
 
 using namespace std;
 
@@ -41,7 +51,7 @@ int main(int, char**) {
              << GLFW_VERSION_REVISION << "\n";
         int major, minor, revision;
         glfwGetVersion(&major, &minor, &revision);
-        clog << "gg. GLFW running as v" 
+        clog << "gg. GLFW running as v"
              << major << "." << minor << "." << revision << "\n";
         clog << "gg. GLFW version string " << glfwGetVersionString() << "\n";
     }
@@ -87,9 +97,7 @@ int main(int, char**) {
 
     glViewport(0, 0, size.x, size.y);
 
-    //auto e1 = POOL.spawn_entity();
-    //auto e2 = POOL.spawn_entity();
-
+    demo::init();
     ui::init_callbacks(window);
     ai::init();
     physics::init();
@@ -103,7 +111,7 @@ int main(int, char**) {
     while (!glfwWindowShouldClose(window)) {
         frame_time.tick();
         //FPS recorder
-        if (1 < chrono::duration_cast<chrono::seconds>(frame_time.time() - last_s).count()) {
+        if (1.f < frame_time - last_s) {
             clog << "FPS: " << fps << "\n";
             fps = 0;
             last_s = frame_time.time();
@@ -111,6 +119,8 @@ int main(int, char**) {
             ++fps;
         }
 
+        double total_time = frame_time - init_time;
+        demo::run(frame_time.delta_s(), total_time);
         ////AI: iterates over agents, which often depend on boundvolumes, dynamics
         //and transforms.
         ai::update_agents();

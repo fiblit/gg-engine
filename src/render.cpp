@@ -4,6 +4,7 @@
 #include "light/PointLight.h"
 #include "light/DirLight.h"
 #include "light/SpotLight.h"
+#include "model/LineMesh.h"
 #include "model/CubeMesh.h"
 #include "io.h"
 #include "ui.h"
@@ -70,8 +71,15 @@ void init(glm::vec<2, int> dims) {
     mtl->add(GL_VERTEX_SHADER, pwd + "/res/glsl/tex.vert");
     mtl->add(GL_FRAGMENT_SHADER, pwd + "/res/glsl/lit_mtl.frag");
     mtl->build();
-    POOL.for_<Mesh>([](Mesh& m, Entity&){
-        m.set_material(mtl.get(), 4.0f);
+
+    POOL.for_<Mesh>([&](Mesh& m, Entity&){
+        //TODO: material as component so entities can set their albedo & shaders
+        if (m._type == Mesh::Type::LINE) {
+            //LineMesh& l = m;
+            m.set_material(mtl.get(), 0, glm::vec3(0, 100, 0));
+        } else {
+            m.set_material(mtl.get(), 32);
+        }
         //TODO:
         //.material(Material(
         //  shader,
@@ -82,6 +90,7 @@ void init(glm::vec<2, int> dims) {
      });
 
     //send (static) lights to shader(s)
+    mtl->use();
     mtl->set("n_dir_lights", static_cast<GLint>(dir_lights.size()));
     for (size_t i = 0; i < dir_lights.size(); ++i) {
         dir_lights[i]->pass_to(*mtl, "dir_lights[" + to_string(i) + "].");
@@ -98,8 +107,8 @@ void init(glm::vec<2, int> dims) {
     //set up camera
     cam = make_unique<Camera>();
     cam->aspect(static_cast<float>(dims.x / dims.y));
-    cam->set_pos(glm::vec3(4, 5, 6));
-    cam->set_rot(glm::vec3(-0.5, -1, -1), glm::vec3(0, 1, 0));
+    cam->set_pos(glm::vec3(0, 20, 20));
+    cam->set_rot(glm::vec3(0, -1, -1), glm::vec3(0, 1, 0));
 
     //TODO: Uniform buffer object; see below
     cam->apply_proj(*mtl);
@@ -124,10 +133,19 @@ void draw() {
     //TODO: dynamic lighting
 
     POOL.for_<Mesh>([&](Mesh& m, Entity& e){
-        auto& t = *POOL.get<Transform>(e);
-        mtl->set("model", t.global_mat());
+        auto t = POOL.get<Transform>(e);
+        if (t) {
+            mtl->set("model", t->global_mat());
+        } else {
+            mtl->set("model", glm::mat4(1.f));
+        }
         //update models _and_ do glDraw; this combination seems to cause issues.
-        m.draw();
+        if (m._type == Mesh::Type::LINE) {
+            LineMesh l = m;
+            l.draw();
+        } else {
+            m.draw();
+        }
     });
 }
 
@@ -153,7 +171,7 @@ void input_key(GLFWwindow* w, double ddt) {
     if (ui::key_map[GLFW_KEY_F]) {
         motion += glm::vec3(0, -1, 0);
     }
-    cam->move(motion * dt);
+    cam->move(5.f*motion * dt);
 
     float roll = 0;
     if (ui::key_map[GLFW_KEY_Q]) {

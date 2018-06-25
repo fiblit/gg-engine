@@ -20,7 +20,8 @@ unique_ptr<Nodes> PRM::nearby(NodeId source) {
 void PRM::connect() {
     _roadmap->for_vertex([&](NodeId v) {
         //connect nearby nodes to v
-        for (NodeId i : *nearby(v)) {
+        auto near = nearby(v);
+        for (NodeId i : *near) {
             //if the nearby points are within line of sight
             if (_cspace->line_of_sight(*_roadmap->data(v), *_roadmap->data(i))) {
                 //directed because we'll traverse the other side in for_vertex

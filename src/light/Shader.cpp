@@ -7,7 +7,9 @@
 #include "../util/debug.h"
 
 using namespace std;
+#ifndef WIN32
 using namespace std::experimental;
+#endif
 
 Shader::Shader()
     : program(0)
@@ -94,15 +96,15 @@ bool Shader::link() {
     return success;
 }
 
-optional<GLint> Shader::check_uniform(string uniform) {
+std::experimental::optional<GLint> Shader::check_uniform(string uniform) {
     if (uniform.substr(3) == "gl_") {
         cerr << "gg! Shaders cannot use gl_ before uniforms " << uniform << "\n";
-        return nullopt;
-    } 
+        return std::experimental::nullopt;
+    }
     GLint loc = glGetUniformLocation(program, uniform.c_str());
     if (loc == -1) {
         cerr << "gg! Shaders do not contain uniform " << uniform << "\n";
-        return nullopt;
+        return std::experimental::nullopt;
     }
     return loc;
 }

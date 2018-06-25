@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
-#include <cstddef>
 #include <string>
+#include <cstddef>
 
 using namespace std;
 
@@ -15,6 +15,11 @@ Mesh::Mesh(const vector<Vertex>& verts,
     attrib();//expect the data to be like this
     buffer();//here is some (static) data; different for skinning
     glBindVertexArray(0);
+
+    _type = Type::ANY;
+}
+
+Mesh::~Mesh() {
 }
 
 void Mesh::gen() {
@@ -85,22 +90,36 @@ void Mesh::bind_textures() {
     glActiveTexture(GL_TEXTURE0);
 }
 
+void Mesh::unbind_textures() {
+    for (GLuint i = 0; i < textures.size(); ++i) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    glActiveTexture(GL_TEXTURE0);
+}
+
 void Mesh::set_material(Shader* material, float shininess,
         glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular) {
-    mtl = material;
-    glBindVertexArray(vao);
-    mtl->use();
-    bind_textures();
-    mtl->set("material.shininess", shininess);
-    mtl->set("material.color.ambient", ambient);
-    mtl->set("material.color.diffuse", diffuse);
-    mtl->set("material.color.specular", specular);
-    glBindVertexArray(0);
+     mtl = material;
+    _shininess = shininess;
+    if (textures.size() == 0) {
+        _ambient = ambient;
+        _diffuse = diffuse;
+        _specular = specular;
+    } else {
+        _specular = _diffuse = _ambient = glm::vec3(0);
+    }
 }
 
 void Mesh::draw() {
     mtl->use();
     glBindVertexArray(vao);
+    bind_textures();
+    mtl->set("material.shininess", _shininess);
+    mtl->set("material.color.ambient", _ambient);
+    mtl->set("material.color.diffuse", _diffuse);
+    mtl->set("material.color.specular", _specular);
     glDrawElements(GL_TRIANGLES, static_cast<int>(indices.size()), GL_UNSIGNED_INT, nullptr);
+    unbind_textures();
     glBindVertexArray(0);
 }

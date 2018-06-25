@@ -38,6 +38,8 @@ void handle_input(GLFWwindow* w, double delta_s) {
     }
     d_scroll = 0.f;
     d_cursor_pos = glm::vec2(0, 0);
+
+    memcpy(prior_key_map, key_map, 512 * sizeof(int));
 }
 
 void add_handler(std::function<void(GLFWwindow*, double)> handle) {
@@ -45,7 +47,6 @@ void add_handler(std::function<void(GLFWwindow*, double)> handle) {
 }
 
 void key_callback(GLFWwindow*, int key, int, int action, int) {
-    prior_key_map[key] = key_map[key];
     key_map[key] = action;
 }
 

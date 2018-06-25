@@ -59,9 +59,37 @@ std::vector<Entity*> BVH::query(BoundVolume* q) {
     if (left == nullptr) {
         return std::vector<Entity*>();
     }
-    //we are making terrible assumptions
-    query_(dynamic_cast<Circ*>(q), NN);
+
+    if (q->_vt == BoundVolume::volume_type::CIRC) {
+        query_(static_cast<Circ*>(q), NN);
+    } else {
+        query_(dynamic_cast<Rect*>(q), NN);
+    }
     return NN;
+}
+
+void BVH::query_(Rect* q, std::vector<Entity*>& NN) {
+    if (is_leaf()) {
+        if (o != nullptr) {
+            auto& bv = **(POOL.get<BoundVolume*>(*o));
+            if (bv._vt == BoundVolume::volume_type::CIRC) {
+                if (circ_rect_collider_(static_cast<Circ*>(&bv), q)) {
+                    NN.push_back(o);
+                }
+            }
+            else {
+                if (rect_rect_collider_(q, static_cast<Rect*>(&bv))) {
+                    NN.push_back(o);
+                }
+            }
+        }
+    }
+    else {
+        if (rect_rect_collider_(q, &aabb)) {
+            left->query_(q, NN);
+            right->query_(q, NN);
+        }
+    }
 }
 
 void BVH::query_(Circ* q, std::vector<Entity*>& NN) {
@@ -86,6 +114,12 @@ void BVH::query_(Circ* q, std::vector<Entity*>& NN) {
             right->query_(q, NN);
         }
     }
+}
+
+bool BVH::rect_rect_collider_(Rect* q, Rect* r) {
+    float w = q->_w + r->_w;
+    float h = q->_h + r->_h;
+    return Rect(r->_o, w, h).collides(q->_o);
 }
 
 bool BVH::circ_rect_collider_(Circ* q, Rect* r) {

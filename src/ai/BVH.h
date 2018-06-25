@@ -16,18 +16,20 @@ public:
     //only use Circ queries please...
     std::vector<Entity*> query(BoundVolume* q);
 private:
-    //terrible assumptions
+    void query_(Rect* q, std::vector<Entity*>& NN);
     void query_(Circ* q, std::vector<Entity*>& NN);
     //don't use, test later as the sqrt will probably make this slower
     //this would be useful if it is faster, though, since circ/rect is common
     //that would also mean I need to update my BV code.
     bool circ_rect_collider_(Circ* q, Rect* r);
 
+    bool rect_rect_collider_(Rect* q, Rect* r);
+
     bool circ_circ_collider_(Circ* q, Circ* c);
 public:
     bool is_leaf();
     size_t size();
-    
+
     union {
         BVH* left;
         Entity* o;

@@ -1,6 +1,10 @@
 #include "LMP.h"
 #include "Pool.h"
+#include "BVH.h"
 //#include "debug.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
+#undef GLM_ENABLE_EXPERIMENTAL
 #include <limits>
 
 //TODO: properly polymorph for all BoundingVolumes
@@ -70,14 +74,18 @@ glm::vec2 LMP::lookahead(Agent& a, BoundVolume& bv) {
         t_new = (*(a.plan))[static_cast<size_t>(a.num_done)];
 
         size_t next = static_cast<size_t>(a.num_done + 1);
+        size_t target = static_cast<size_t>(a.num_done);
         bool incomplete = a.plan->size() > next;
         bool next_visible = a.cspace->line_of_sight(bv._o, (*(a.plan))[next]);
-        while (incomplete && next_visible) {
-            a.num_done++;
+        bool at_target = glm::length2(bv._o - (*(a.plan))[target]) < 0.001;
+        while (at_target || (incomplete && next_visible)) {
+            ++a.num_done;
             t_new = (*(a.plan))[static_cast<size_t>(a.num_done)];
             next = static_cast<size_t>(a.num_done + 1);
+            target = static_cast<size_t>(a.num_done);
             incomplete = a.plan->size() > next;
             next_visible = a.cspace->line_of_sight(bv._o, (*(a.plan))[next]);
+            at_target = glm::length2(bv._o - (*(a.plan))[target]) < 0.001;
         }
     } else {
         //at end, go to end.
@@ -86,12 +94,13 @@ glm::vec2 LMP::lookahead(Agent& a, BoundVolume& bv) {
     return t_new;
 }
 
+const double TTC_THRESHOLD = 5.0;
 glm::vec2 LMP::ttc_forces_(double ttc, glm::vec2 dir) {
     float len = glm::length(dir);
     if (fabs(len) > 0.000000001)
         dir /= len;
 
-    double t_h = 5.0;//seconds
+    double t_h = TTC_THRESHOLD;//seconds
     double mag = 0;
     if (ttc >= 0 && ttc <= t_h)
         mag = (t_h - ttc) / (ttc + 0.001);
@@ -201,7 +210,7 @@ glm::vec2 LMP::calc_sum_force(
         BVH* dynamic_bvh,
         std::vector<Entity*>, //statics
         std::vector<Entity*>) {// dynamics) {
-    float speed = 6.0f; // x m/s
+    float speed = 1.0f; // x m/s
     glm::vec2 goal_vel;
     glm::vec2 goal_F(0);
 
@@ -211,43 +220,49 @@ glm::vec2 LMP::calc_sum_force(
     auto& d = *POOL.get<Dynamics>(*e);
     if (a.has_plan()) {
         a.local_goal = LMP::lookahead(a, bv);
-        goal_vel = glm::normalize(a.local_goal - bv._o) * speed /** dt*/;
-        goal_F = 2.0f*(goal_vel - glm::vec2(d.vel.x, d.vel.z));
-    }
-    else {
+        glm::vec2 diff = a.local_goal - bv._o;
+        //prevents overshooting
+        goal_vel = (diff / glm::max(1.f, glm::length(diff))) * speed;
+    } else {
         a.local_goal = bv._o;
         goal_vel = glm::vec2(0);
-        goal_F = glm::vec2(0);
     }
 
-    float real_speed = glm::length(goal_vel);
+    goal_F = 2.0f*(goal_vel - glm::vec2(d.vel.x, d.vel.z));
+
+    float real_speed = glm::length(d.vel);
 
     /* ttc - approximate */
     glm::vec2 ttc_F(0);
-    Circ q(bv._o, real_speed * 5);
+    //keeping this small is very important for framerate; at some point I'll
+    //have to replace this circle with an extrusion or cone. ... or a shifted
+    //circle! this works pretty damn well! 1000 Agents at 30FPS!! :D
+    glm::vec2 vel2d(d.vel.x, d.vel.z);
+    Circ q(bv._o + vel2d*.5f, real_speed * .5f * static_cast<float>(TTC_THRESHOLD));
+
     std::vector<Entity*> NNdynamic = dynamic_bvh->query(&q);
-    for (Entity* near : NNdynamic) {
-        auto b = POOL.get<Agent>(*near);
-        auto& bbv = **POOL.get<BoundVolume*>(*near);
-        auto& bd = *POOL.get<Dynamics>(*near);
+    for (Entity* nearby : NNdynamic) {
+        Agent* b = POOL.get<Agent>(*nearby);
+        BoundVolume& bbv = **POOL.get<BoundVolume*>(*nearby);
+        Dynamics& bd = *POOL.get<Dynamics>(*nearby);
         if (&a == b) {
             //if the agents are the same, move on.
             continue;
         }
         double ttc = LMP::ttc(bv, glm::vec2(d.vel.x, d.vel.z),
             bbv, glm::vec2(bd.vel.x, bd.vel.z));
-        if (ttc > 4) {//seconds
+        if (ttc > TTC_THRESHOLD) {//seconds
             continue;
         }
         ttc_F += LMP::ttc_forces(d, bv, bd, bbv, static_cast<float>(ttc));
     }
 
     std::vector<Entity*> NNstatic = static_bvh->query(&q);
-    for (Entity* near : NNstatic) {
-        auto& bbv = **POOL.get<BoundVolume*>(*near);
+    for (Entity* nearby : NNstatic) {
+        BoundVolume& bbv = **POOL.get<BoundVolume*>(*nearby);
         double ttc = LMP::ttc(bv, glm::vec2(d.vel.x, d.vel.z),
             bbv, glm::vec2(0));
-        if (ttc > 4) {//seconds
+        if (ttc > TTC_THRESHOLD) {//seconds
             continue;
         }
         ttc_F += ttc_forces(d, bv, bbv, static_cast<float>(ttc));
@@ -266,5 +281,5 @@ glm::vec2 LMP::calc_sum_force(
     }
     */
 
-    return  goal_F + ttc_F;// +boid_F + follow_F;
+    return goal_F + ttc_F;
 }
