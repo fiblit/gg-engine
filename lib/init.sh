@@ -39,7 +39,10 @@ printf "%-45s" "Downloading latest version of glfw..."
 git clone --depth=1 https://github.com/glfw/glfw.git &> /dev/null
 printf "%15s\n" "Done."
 printf "%-45s" "Downloading latest version of glm..."
-git clone --depth=1 https://github.com/g-truc/glm.git &> /dev/null
+git clone https://github.com/g-truc/glm.git &> /dev/null
+cd glm
+git reset --hard d214fbaaf1bebee952f9949ab9c649d02ca00552
+cd ..
 printf "%15s\n" "Done."
 printf "%-45s" "Downloading latest version of assimp..."
 git clone --depth=1 https://github.com/assimp/assimp.git &> /dev/null
