@@ -1,0 +1,43 @@
+---
+Language: Cpp
+
+### Theme (See doc/style.md for more)
+# * Mainly mixes WebKit into LLVM.
+# * I avoid righthand alignments (ARA) of important info.
+# * Any LLVM specifc things are changed to be more generally useful.
+# * Prefer 4 spaces over 2 spaces. This may change for consistency soon.
+BasedOnStyle: LLVM
+
+
+### ARA
+AlignAfterOpenBracket: AlwaysBreak
+AlignOperands: false
+AlignTrailingComments: false
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: Multiline
+#? BinPackArguments: false
+#? BinPackParameters: false
+BreakBeforeBinaryOperators: NonAssignment
+#? BreakBeforeBinaryOperators: All
+CompactNamespace: false
+PointerAlignment: Left
+
+### IndentWidth preference
+AccessModifierOffset: -4
+ConstructorInitializerIndentWidth: 8
+ContinuationIndentWidth: 8
+IndentWidth: 4
+IndentPPDirectives: AfterHash
+
+### Usefulness
+IncludeBlocks: Merge
+IncludeCategories:
+    - Regex:            '^".*"'
+      Priority:         1
+    - Regex:            '^<.*\.h"'
+      Priority:         2
+    - Regex:            '<.*'
+      Priority:         3
+    - Regex:            '.*'
+      Priority;         4
+

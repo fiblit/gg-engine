@@ -1,4 +1,5 @@
 \.*
+!.clang-format
 !\.git*
 [Tt]emp/
 [Bb]uild/
