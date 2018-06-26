@@ -13,8 +13,12 @@ public:
     BVH(std::vector<Entity*>);
     ~BVH();
 
-    //only use Circ queries please...
     std::vector<Entity*> query(BoundVolume* q);
+
+    //implementing these in any meaningful fashion requires a refactor of the BVH
+    //BVH* leaf_query(Entity* k);
+    //std::vector<Entity*> k_query(Entity* o);
+    //std::vector<Entity*> r2_query(Entity* o);
 private:
     void query_(Rect* q, std::vector<Entity*>& NN);
     void query_(Circ* q, std::vector<Entity*>& NN);
