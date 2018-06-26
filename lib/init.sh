@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) 2016-2018 Dalton Hildreth
+# This file is under the MIT license. See the LICENSE file for details.
 
 printf "%-45s" "Removing old 3rd-party libs..."
 {

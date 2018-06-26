@@ -1,3 +1,5 @@
+// Copyright (c) 2016-2018 Dalton Hildreth
+// This file is under the MIT license. See the LICENSE file for details.
 #include "Seeder.h"
 
 typedef std::chrono::high_resolution_clock hrclock;

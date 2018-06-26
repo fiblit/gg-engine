@@ -1,4 +1,6 @@
 #version 330 core
+// Copyright (c) 2016-2018 Dalton Hildreth
+// This file is under the MIT license. See the LICENSE file for details.
 struct Color {
     vec3 ambient;
     vec3 diffuse;

@@ -1,3 +1,5 @@
+// Copyright (c) 2016-2018 Dalton Hildreth
+// This file is under the MIT license. See the LICENSE file for details.
 #ifndef SHADER_H
 #define SHADER_H
 

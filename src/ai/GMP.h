@@ -1,3 +1,5 @@
+// Copyright (c) 2016-2018 Dalton Hildreth
+// This file is under the MIT license. See the LICENSE file for details.
 #ifndef GMP_H
 #define GMP_H
 
