@@ -2,6 +2,9 @@
 #include "ai.h"
 #include "Pool.h"
 #include "util/debug.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
+#undef GLM_ENABLE_EXPERIMENTAL
 
 namespace physics {
 void init() {}
@@ -33,6 +36,11 @@ void simulate(float dt) {
 
         glm::vec3 half_v = (next_v + d.vel) * .5f;
         //glm::vec3 half_v = d.vel + (dt * .5f) * d.acc;
+        if (glm::length2(half_v) > 1) {
+            half_v = glm::normalize(half_v);
+            next_v = glm::normalize(next_v);
+            next_a = glm::vec3(0);
+        }
         glm::vec3 next_p = d.pos + dt * (half_v);
 
         #ifdef STOP_COLLISION
