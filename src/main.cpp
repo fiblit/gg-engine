@@ -130,10 +130,12 @@ int main(int, char**) {
         ////sync: currently some components have redundant information that
         //needs to be synced every frame.
         POOL.all_sync();
+        #ifndef RENDER
         ////Render: iterates over meshes, which often depend on transforms.
         render::draw();
         //double buffer
         glfwSwapBuffers(window);
+        #endif
         ////UI: would iterate over controllers, but it just handles specific
         //entities for now
         glfwPollEvents();
