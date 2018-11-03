@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "ms-vscode.cpptools",
+        "davidanson.vscode-markdownlint",
+        "bungcip.better-toml",
+        "twxs.cmake",
+        "vector-of-bool.cmake-tools",
+        "slevesque.shader",
+        "dbaeumer.vscode-eslint",
+        "eg2.tslint",
+        "trixnz.vscode-lua"
+    ]
+}

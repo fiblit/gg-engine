@@ -1,5 +1,6 @@
 \.*
-!.clang-format
+!\.clang-format
+!\.vscode
 !\.git*
 [Tt]emp/
 [Bb]uild/
