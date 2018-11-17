@@ -19,7 +19,7 @@ printf "%-45s\n" "Downloading latest 3rd-party libs..."
 
 # Refresh Catch
 printf "%-45s" "Downloading latest catch.hpp..."
-curl -s https://api.github.com/repos/philsquared/Catch/releases/latest \
+curl -s https://api.github.com/repositories/1062572/releases/latest \
     | jq --raw-output '.assets[0] | .browser_download_url' \
     | xargs wget \
     &> /dev/null
@@ -30,8 +30,8 @@ printf "%-45s" "Install glad and generate latest..."
 {
     mkdir glad
     cd glad
-    pip install --user glad
-    glad --out-path=. --generator=c --local-files --spec=gl --no-loader
+    pip3 install --user glad
+    python3 -m glad --out-path=. --generator=c --local-files --spec=gl --no-loader
     cd ..
 } &> /dev/null
 printf "%15s\n" "Done."
@@ -43,7 +43,7 @@ printf "%15s\n" "Done."
 printf "%-45s" "Downloading latest version of glm..."
 git clone https://github.com/g-truc/glm.git &> /dev/null
 cd glm
-git reset --hard d214fbaaf1bebee952f9949ab9c649d02ca00552
+git reset --hard d214fbaaf1bebee952f9949ab9c649d02ca00552 &> /dev/null
 cd ..
 printf "%15s\n" "Done."
 printf "%-45s" "Downloading latest version of assimp..."
@@ -68,4 +68,3 @@ printf "%-45s" "Cleaning libs..."
     find lib -name '.git' | xargs rm -rf
 } &> /dev/null
 printf "%15s\n" "Done."
-
