@@ -1,147 +1,577 @@
-# Turncoat C++ Style Guide (for beyond .clang-format)
+# Turncoat Style Guide (C++)
 
-##Philosophy
+---
 
-Important *themes* of my style:
-0. Important information is presented on the *left*.
-0. Whenever reasonable, prefer vertically compacted information as well.
-0. Reading is more important than maintaining.
-0. Write code for a future you with dementia, dyslexia, amnesia, and malice.
-0. Reduce cognitive load.
-0. Many indents smells like verbose abstractions or complexity. Refactor?
-0. Encourage good idioms.
-0. Don't be stupid, so ignore the guidelines as needed.
+## Principles
+
+1. Be consistent more than anything else.
+1. Code is read/diffed more often than it is written.
+1. Write code for a future you (with amnesia, dyslexia, and malice.)
+    > "You know you're brilliant but maybe you'd like to understand what you did
+    > 2 weeks from now."
+    > Linus Torvalds
+1. Explicit over Implicit.
+1. Flat over Nested
+
+    So, present important information on the **left**.
+1. Straightforward over Convoluted.
+
+    So, prefer vertically compacted information as is reasonable.
+1. Errors AND warnings (from gcc/clang/engine) should be loud.
+1. Typography implies Semantics.
+1. Prefer being language-idiomatic unless it hampers requirements.
+1. You can effectively follow the Rust variant of PEP-8 except applying it to
+  C++ with LLVM's high-level heuristics; however, minor influences come from
+  AirBnB JS, Lua, Markdown, and Mozilla:
+    - [Rust](https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md)
+    - [Pythonic PEP-8](https://www.python.org/dev/peps/pep-0008/)
+    - [LLVM](https://llvm.org/docs/CodingStandards.html)
+    - [AirBnB JS](https://github.com/airbnb/javascript)
+    - [Lua](http://lua-users.org/wiki/LuaStyleGuide)
+    - [Mozilla](https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Coding_Style)
+
+    Note, my style is meant to be cross-linguistically useful, so I remove any
+    project specific things. LLVM, however, has many style points that I
+    virtually copy to here.
+
+    Changes to `.clang-format`:
+
+    ```diff
+    + BasedOnStyle: LLVM
+    ```
+
+1. These are only guidelines, so explicitly ignore them if it helps.
+
+---
+
+## Important
+
+### Avoid Righthand Alignments
 
 Anything remotely important enough to align should be on the left of my screen
-where my eyeballs are reading vertically. Thus, important things go to the
-left, and clutter goes to the right.
+where my eyeballs are reading vertically. Thus, important things go to the left,
+and unimportant things go to the right. This leads to a complete and total
+aversion from "visual" indenation, so I prefer "block" indentation as
+demonstrated in rustfmt's defaults.
 
 When my eyes are scanning they are reading vertically, not jumping sideways.
 Within code, unlike text, horizontal jumps tend to be far more drastic, so I
-prefer information to be compact and vertically oriented. I prefer this
-because it lets me read more code as I'm scanning over it. This eases the 
-need for page jumps which require cognitive load in recalling the purpose of
-off-screen regions.
+prefer information to be compact and vertically oriented. I prefer this because
+it lets me read more code as I'm scanning over it. This eases the need for page
+jumps that require recalling off-screen regions' purpose.
 
-I generally agree with the *themes* of these statements from Linus Torvalds:
-"If you need more than 3 levels of indentation, you're screwed anyway, and
-should fix your program." which thus inspired my *'self-reflection'* theme; and
-"You know you're brilliant but maybe you'd like to understand what you did 2
-weeks from now.", which inspired my *'future you'* theme.
+**GOOD:**
 
-My style (as seen in my .clang-format) generally favors LLVM because of the
-compactness and common lefthand alignment. Most exceptions are given to
-removing items specific to the LLVM project or those which encourage having
-important information on the right of the screen, contrary to my first theme.
+```c++
+functionator(
+    abcdefg,
+    hijkllmnop,
+    qrst,
+    uvwxyz
+);
+```
+
+*BAD:*
+
+```c++
+functionator(abcdefg,
+             hijklmnop,
+             qrst,
+             uvwxyz);
+```
+
+Changes to `.clang-format`:
+
+```diff
++AlignAfterOpenBracket: AlwaysBreak
++AlignOperands: false
++AlignTrailingComments: false
++AlwaysBreakBeforeMultilineStrings: true
++BreakConstructorInitializers: AfterColon # No visual indentation!
++PointerAlignment: Left
++PenaltyReturnTypeOnItsOwnLine: 1000
+```
+
+### Semantic Lists should look like Typographic Lists
+
+Because of Principle 8, writing out a list as a horizontal or vertical list will
+imply its meaning.
+
+**GOOD:**
+
+```c++
+Horizontal(abcdefg, hijklmn, opqrst, uvwxyz);
+Vertical(
+    abcdefg,
+    hijklmn,
+    opqrst,
+    uvwxyz
+);
+```
+
+*BAD:*
+
+```c++
+Textual(abcdefg, hijklmn,
+    opqrst, uvwxyz);
+```
+
+If this "write it as a list" style bothers you, I encourage this heuristic:
+> Try creating variables to capture complex arguments with a descriptive name
+
+Thus, you **should** use this:
+
+```c++
+int complex_var = complex_expression == complex_expression;
+fun(complex_var, var, i);
+```
+
+*instead of* this:
+
+```c++
+fun(
+    complex_expression == complex_expression,
+    var,
+    i
+);
+```
+
+For this item, you must end initializer lists with a trailing comma, but only
+if it doesn't fit on one line.
+
+Changes to `.clang-format`:
+
+```diff
++AllowAllParametersOfDeclarationOnNextLine: false
++AllowShortCaseLabelsOnASingleLine: true
++BreakBeforeBinaryOperators: NonAssignment # Not All to be like structs/funcs
++ConstructorInitializersAllOnOneLineOrOnePerLine: true
++# DanglingParentheses: true
+```
+
+### Semantic Blocks should look like typographic block-indents
+
+**GOOD:**
+
+```c++
+//                   max line
+int funct(              //
+    parameters,         //
+    options,            //
+    arguments,          //
+    error_codes         //
+) {                     //
+    code;               //
+    return 0;           //
+}                       //
+                        //
+struct Treasure {       //
+    int swords;         //
+    int potions;        //
+};                      //
+                        //
+funct(                  //
+    params,             //
+    temp_options,       //
+    args,               //
+    errs                //
+);                      //
+code;                   //
+code;                   //
+```
+
+An ignorable disadvantage to this style is that vertical space is used faster.
+*Compare:*
+
+```c++
+int funct(parameters, options,   //
+          arguments,             //
+          error_codes) {         //
+    code;                        //
+    return 0;                    //
+}                                //
+                                 //
+struct Treasure { int swords;    //
+                  int potions; };//
+                                 //
+funct(params, temp_options,      //
+      args, errs);               //
+code;                            //
+code;                            //
+```
+
+Note the accepted style, though, is how (complex) structs are usually written.
+Because both a parameter list and a type specification are similar semanically,
+Principle 8 claims they should be similar typographically. Arguably, both
+specify a "package' of data or some kind of data layout:
+
+- Structs stuff variables into a space in memory.
+- Functions stuff arguments into their stack when invoked.
+
+Changes to `.clang-format`:
+
+```diff
++BinPackArguments: false
++BinPackParameters: false
+```
+
+#### Format lambdas like blocks of code
+
+```c++
+needs_callback(42, args, [&]() {
+    code;
+    return 4;
+});
+```
+
+### One Line implies roughly one logical unit
+
+Again, because of Principle 8. Thus, closing braces are helpful to see because
+they denote lexical scoping, cleanup, and destruction. Packing arguments or
+parameters only makes sense if items on the same line are semantically related,
+at which point they should just be a structured type. So, either in the sense of
+"these are all parameters" or "these are X parameters".
+
+### Comment profusely! Explain why, not how!
+
+Always use single-line ones (this makes debugging easier, and it's easier to see
+what's commented).
+
+It's very helpful to explain the purpose of a class or function.
+
+### Add copyright headers
+
+Like this:
+
+```c++
+// Copyright (c) 20yy-20yy Dalton Hildreth
+// This file is under the MIT license. See the LICENSE file for details.
+```
+
+### Profusely use the latest (stable) tech in languages
+
+Even C++17 is occassionally used throughout this repo. Lately C++ has improved
+its expressiveness, which just makes programming more pleasant and simpler.
+
+For example, use const(expr) correctness and ownership semantics. Generally use
+`unique_ptr` with weak `*` references to them. Occassionally use `shared_ptr`
+with `weak_ptr` references to them.
+
+### Prefer composition over (implementation) inheritance
+
+Inheritance should be very carefully applied, and likely not for code re-use.
 
 ---
 
-##Testing
+## High-Level
 
-You should unit test with Catch2. Just because I'm not good at it doesn't mean
-you should be too! Admittedly, I will set this up better sooner than later.
+### Header Include Order
 
+Generally go fro specific to generic: local > module > project > system. For
+example:
 
-##Safety/Types
+```c++
+// local
+#include "impl.h"
+// module
+#include "help.h"
+#include "lower/helper.h"
+// project
+#include "../module/thing.h"
+// third party
+#include <thirdparty/shenanigans>
+#include <glm/glm.hpp>
+// system
+#include <memory>
+// c system
+#include <cstdlib>
+// OS - specific
+#include <windows.h>
+```
 
-Try to use smart pointers and ownership semantics.
-Generally use `unique_ptr` (rarely with weak `*` references to them)
-Occasionally use `shared_ptr` with `weak_ptr` references to them.
+Changes to `.clang-format`:
+
+```diff
++IncludeCategories:
++  - Regex:            '^".*"'
++    Priority:         1
++  - Regex:            '^<.*\.h"'
++    Priority:         2
++  - Regex:            '<.*'
++    Priority:         3
++  - Regex:            '.*'
++    Priority:         4
+```
+
+### Headers should be self-contained; use .inc for ones that are not
+
+### (Often) no RTTI, (Often) no exceptions
+
+They confuse logic, twisting it up like noodles and bogging down the program.
+
+As far as error handling goes, bitsquid dev Niklas gives good advice:
+
+- [Part 1: Intro & Unexpected Errors](http://bitsquid.blogspot.com/2012/01/sensible-error-handling-part-1.html)
+- [Part 2: Expected Errors](http://bitsquid.blogspot.com/2012/02/sensible-error-handling-part-2.html)
+- [Part 3: Warnings](http://bitsquid.blogspot.com/2012/02/sensible-error-handling-part-3.html)
+
+### Write cross-platform, portable code. Isolate it where you cannot
+
+### DO NOT use static constructors (globals with them)
+
+This needlessly impacts performance and memory use.
+
+### Limit the use of `struct` to POD-like types
+
+### `#include` as little as possible, but don't bother with forward decls
+
+### Keep "internal" headers/interfaces private
+
+Don't put them in include/
+
+### Exit early and continue to simplify code
+
+The same goes for not using an else right after an early-jump. This is largely
+because of Principle 7.
+
+### Fail Early
+
+Assert, unit test, and play test. A Lot.
+
+You should use Catch2, and even if I'm not good at it doesn't mean you should be
+too! Admittedly, I will set this up better sooner than later.
 
 ---
 
-##Naming
+## Low-Level
 
-In general: `snake_case`. If hidden: `_under_snake_case`. If constant, global,
-or important: `CAPS_CASE`. If it refers to an abstraction: `CamelCase`.
+### Naming should be descriptive without being superfluous
 
-- Types: `CamelCase`
-- Namespaces: `nospace //tend to be short`
+Case definition:
+
+- Normal: HTML, C-Space, Two Words
+- snake_case: html, cspace, two_words
+- _leading_case: _html, _cspace, _two_words
+- SCREAM_CASE: HTML, CSPACE, TWO_WORDS
+- CamelCase: Html, Cspace, TwoWords
+- trailing_case_: html_, cspace_, two_words_
+- nonecase: html, cspace, twowords
+
+Generally, values = snake_case and Types = CamelCase
+
+- Types: CamelCase
+- Namespaces: nonecase
 - Functions:
-    - Methods: `snake_case`
-    - Private Methods: `_under_snake_case`
-    - Namespaced: `snake_case`
-    - Globals: `SNAKE_CASE`
-    - File Static: `_under_snake_case`
-    - Getter (rare): `Type var_name()`
-    - Setter (rare): `void var_name(Type v)`
-- Variables: 
-    - Members: `_under_snake_case`
-    - Locals: `snake_case`
-    - Parameters: `snake_case_`
-    - Globals: `CAPITAL_CASE`
-    - Iters: `i j k`
-    - Vectors: `(w) x y z, u v w`
-    - Color: `r g b a, h s v`
-    - Temps: `t s`
-    - Randnum: `r`
-    - File: `f`
-    To clarify word boundaries, if it was originally hyphenated, use one word.
-    e.g. Configuration-space -> C-Space -> _cspace
-    If it's an acronym, treat like one word.
-    Hyper Text Markup Language -> HTML -> _html
-    Probabilistic Roadmap -> PRM -> Prm
+  - Methods: snake_case
+  - Private Methods: _leading_case
+  - Namespaced: snake_case
+  - Globals: SCREAM_CASE
+  - File Static: _leading_case
+  - Getter (rare): Type var_name()
+  - Setter (rare): void var_name(Type v)
+- Variables:
+  - Private Members: _leading_case
+  - Locals: snake_case
+  - Globals: SCREAM_CASE
+  - Iters: i j k
+  - Vectors: (w) x y z, u v w
+  - Color: r g b a, h s v
+  - Temporary: t s
+  - Random: r
+  - File: f
 
-##Whitespace
-use
-    (4 space indentation)
-not
-	(1 tab indentation)
+To clarify word boundaries, if it was originally hyphenated, use one word.
+e.g. Configuration-space -> C-Space -> _cspace
+If it's an acronym, treat like one word.
+Hyper Text Markup Language -> HTML -> _html
+Probabilistic Roadmap -> PRM -> Prm
 
-##Bracing 
+### Use `#pragma once` instead of header guards
 
-K&R -
-    if (a) {
-        return b;
-    } else {
-        return c;
+### Use range-based for loops
+
+```c++
+for (const auto& val : container) {
+    observe(val);
+}
+for (auto& val : container) {
+    val.change();
+}
+for (auto copy : container) {
+    observe(/*small*/copy);
+    copy.change();
+    save(copy);
+}
+for (auto&& val : container) {
+    proxy_iter_or_generic.change();
+}
+```
+
+### Use `auto` if it helps readability.
+
+Especially helpful for redudant lines or generics
+
+### Use predicate functions instead of predicate loops
+
+The LLVM style guide [gives good reasoning](https://llvm.org/docs/CodingStandards.html#turn-predicate-loops-into-predicate-functions) for this.
+
+**GOOD:**
+
+```c++
+std::array<int, 5> a = {5, 4, 3, 1, 2};
+if (!std::is_sorted(a.cbegin(), a.cend(), [](int a, int b){ return a > b; })) {
+    printf("a is unsorted\n");
+}
+```
+
+It's even better to write a function for predicates you often use. I may also
+write a wrapper library for `<algorithm>` whose API looks closer to this:
+`std::is_sorted(iterable, /* ComparePred */);`
+
+*BAD:*
+
+```c++
+std::array<int, 5> a = {5, 4, 3, 1, 2};
+for (unsigned i = 0; i < a.size() - 1; ++i) {
+    if (a[i] <= a[i + 1]) {
+        printf("a is unsorted\n");
+        break;
     }
+}
+```
 
-except functions -
-    bool is_collide() {
-    }
+### *DO NOT* use `using` in a header at an outer namespace/global scope
 
-##Line continuation
+However, using any "using" is typically avoided except for exceptional
+readibility issues. (This is an awkward trade-off between P2. and P1.)
 
-extra indent continuations (halve?)
-    if (a && abcdefghijklmnopqrstuvwxyz
-            && x && z) {
-        return "still got it!";
-    }
-    
-    //declare
-    void f(int a, int b, int c, int d,
-        int f);
+### *NEVER* `#include <iostream>` either use `fmt` or `cstdio`
 
-    //define
-    void f(int a, int b, int c, int d,
-            int f) {
-        hey;
-    }
+iostream is slow, excessive, and has no clear benefits
 
-##Header order
+### Don't add inline to functions in the class definition
 
-    //local
-    #include "styleguide.h"
-    //module
-    #include "otherthing.h"
-    #include "lower/thing.h"
-    //project
-    #include "../module/thing.h"
-    //3rd pary
-    #include <thirdparty/shenanigans>
-    #include <glm/glm.hpp>
-    #include <GLFW/glfw3.h>
-    //system
-    #include <memory>
-    #include <vector>
-    //c system
-    #include <cstdlib>
-    //OS - probably shouldn't need
-    //#include <windows.h>
-    
-    //Forward declare.
-    class Forward;
-    class Soldiers;
-    class March;
+The `inline` is implicit for member functions define in a class definition.
 
+**GOOD:**
+
+```c++
+class Foo {
+public:
+    void bar() { do_stuff(); };
+};
+```
+
+*BAD:*
+
+```c++
+class Foo {
+public:
+    inline void bar() { do_stuff(); };
+};
+```
+
+### Prefer using enums when passing literal arguments instead of bools
+
+At least, if it is not obvious at the call-site
+
+### Use explicit on a single argument constructor that isn't a type-cast
+
+### Use constructor initializers
+
+They are performant, and they don't hurt readability
+
+---
+
+## Trivial
+
+### Line Length
+
+Max 80 char lines. I like to split my screen a lot. Helps with P4., too.  I'm
+fine with specific projects or regions using 100 char lines, though.
+
+### Indentation
+
+4-SPACEs indent, because it is like PEP-8, Rust, and the mode of C++ users
+according to this source:
+
+- [Tabs or Spaces](https://ukupat.github.io/tabs-or-spaces/)
+
+Though I have always used 4-spaces, I may switch to 2-space in specific projects
+because it is what these use:
+
+- LLVM
+- HTML/CSS/JS
+- Lua
+- Bash
+- Mozilla
+- Markdown
+- Wren
+
+Changes to `.clang-format`:
+
+```diff
++AccessModifierOffset: -4
++ConstructorInitializerIndentWidth: 4
++ContinuationIndentWidth: 4 # Awkward without DanglingParentheses: true
++IndentWidth: 4
++IndentPPDirectives: AfterHash
+```
+
+### No trailing whitespace
+
+Neither at the end of lines or on blank lines.
+
+### Spaces before parentheses
+
+Only do this before control-flow expressions, NOT functions.
+
+**GOOD:**
+
+```c++
+if (foo < bar) {
+    baz();
+}
+```
+
+*BAD:*
+
+```c++
+if(foo < bar){
+    baz ();
+}
+```
+
+### Use preincrement, unless you NEED postincrement
+
+### Anonymous namespaces
+
+They should be small. Prefer static for random functions.
+
+### Fully write out literals (such as .f for floats)
+
+It is better to be explicit about literal types, as per Principle 4. This is
+also because adding the literals can change the type sometimes.
+
+### Be lazy with type modifiers where it's obvious
+
+`unsigned` over `unsigned int`, as per Princple 6. There is no point in writing
+int as `unsigned` unambiguously denotes only one type.
+
+### Use nullptr in C++; check for it without comparators
+
+**GOOD:**
+
+```c++
+if (!a) {
+    a->do_things();
+}
+```
+
+*BAD:*
+
+```c++
+if (a != nullptr) {
+    a->do_things();
+}
+```
