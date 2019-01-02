@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
 #include "Timer.h"
 
@@ -15,21 +15,15 @@ void Timer::tick() {
     _delta = _time - last;
 }
 
-duration<double> Timer::delta() {
-    return _delta;
-}
+duration<double> Timer::delta() { return _delta; }
 
 double Timer::delta_ms() {
     return duration<double, std::milli>(_delta).count();
 }
 
-double Timer::delta_s() {
-    return _delta.count();
-}
+double Timer::delta_s() { return _delta.count(); }
 
-time_point<steady_clock> Timer::time() {
-    return _time;
-}
+time_point<steady_clock> Timer::time() { return _time; }
 
 double Timer::operator-(Timer& timer) {
     return duration<double>(time() - timer.time()).count();

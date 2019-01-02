@@ -2,21 +2,15 @@
 // This file is under the MIT license. See the LICENSE file for details.
 #include "Shader.h"
 
-#include <iostream>
-#include <glm/gtc/type_ptr.hpp>
 #include "../io.h"
+#include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 #include "../util/debug.h"
 
 using namespace std;
-#ifndef WIN32
-using namespace std::experimental;
-#endif
 
-Shader::Shader()
-    : program(0)
-    , success(false) {
-}
+Shader::Shader() : program(0), success(false) {}
 
 Shader::~Shader() {
     for (auto& sobj : shader_objects) {
@@ -72,11 +66,11 @@ bool Shader::compile(GLenum type, const string& path) {
     glShaderSource(shader_object, 1, &c, nullptr);
     glCompileShader(shader_object);
 
-    //check for errors
+    // check for errors
     glGetShaderiv(shader_object, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(shader_object, 512, nullptr, info_log);
-        cerr << "gg! Shader (" << path << ") failed to compile:\n" 
+        cerr << "gg! Shader (" << path << ") failed to compile:\n"
              << info_log << "\n";
     }
     shader_objects.push_back(make_pair(shader_object, path));
@@ -89,7 +83,7 @@ bool Shader::link() {
     }
     glLinkProgram(program);
 
-    //check for errors
+    // check for errors
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(program, 512, nullptr, info_log);
@@ -98,15 +92,16 @@ bool Shader::link() {
     return success;
 }
 
-std::experimental::optional<GLint> Shader::check_uniform(string uniform) {
+std::optional<GLint> Shader::check_uniform(string uniform) {
     if (uniform.substr(3) == "gl_") {
-        cerr << "gg! Shaders cannot use gl_ before uniforms " << uniform << "\n";
-        return std::experimental::nullopt;
+        cerr << "gg! Shaders cannot use gl_ before uniforms " << uniform
+             << "\n";
+        return std::nullopt;
     }
     GLint loc = glGetUniformLocation(program, uniform.c_str());
     if (loc == -1) {
         cerr << "gg! Shaders do not contain uniform " << uniform << "\n";
-        return std::experimental::nullopt;
+        return std::nullopt;
     }
     return loc;
 }
@@ -128,6 +123,6 @@ void Shader::set(string uniform, glm::vec3 v) {
 }
 
 void Shader::set(string uniform, glm::mat4 m) {
-    //supplied in column major order
+    // supplied in column major order
     glUniformMatrix4fv(*check_uniform(uniform), 1, GL_FALSE, glm::value_ptr(m));
 }

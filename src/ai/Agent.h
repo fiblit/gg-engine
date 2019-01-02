@@ -1,16 +1,15 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
-#ifndef AGENT_H
-#define AGENT_H
+#pragma once
 
 #include "PRM.h"
 #include <glm/vec2.hpp>
 #include <vector>
 
 struct Agent {
-    //TODO: remove redundancies that need to be synced.
+    // TODO: remove redundancies that need to be synced.
     glm::vec2 start;
-    //this allows for more dynamic path planning.
+    // this allows for more dynamic path planning.
     glm::vec2 final_goal;
     glm::vec2 local_goal;
 
@@ -25,9 +24,7 @@ struct Agent {
         return has_plan() && num_done == static_cast<int>(plan->size());
     }
 
-    //planning meta-data
+    // planning meta-data
     Cspace2d* cspace;
     PRM* prm;
 };
-
-#endif//AGENT_H

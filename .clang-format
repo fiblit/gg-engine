@@ -1,0 +1,48 @@
+# See docs/style.md for rationale and broader style considerations.
+# While this helps for automating style considerations, clang-format is still
+# not perfect, so you should still use your best judgement. Thus, you should
+# use the client-side hook (in ./hooks/) that suggests changes to your patches.
+# clang-format version 6.0.0-1ubuntu2
+---
+Language: Cpp
+
+# Principle 10
+BasedOnStyle: LLVM
+
+# Important 1: Avoid Righthand Alignments
+AlignAfterOpenBracket: AlwaysBreak
+AlignOperands: false
+AlignTrailingComments: false
+AlwaysBreakBeforeMultilineStrings: true
+BreakConstructorInitializers: AfterColon # No Visual Indent!
+PointerAlignment: Left
+PenaltyReturnTypeOnItsOwnLine: 1000 # Awkward without DanglingParentheses: true
+
+# Important 2: Semantic Lists should look like Typographic Lists
+AllowShortCaseLabelsOnASingleLine: true
+BreakBeforeBinaryOperators: NonAssignment # Not All to be like structs/funcs
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+# DanglingParentheses: true
+
+# Important 3: Semantic Blocks should look like typographic block-indents
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackArguments: false
+BinPackParameters: false
+
+# High-Level 1: Header Include Order
+IncludeCategories:
+  - Regex:            '^".*"'
+    Priority:         1
+  - Regex:            '^<.*\.h"'
+    Priority:         2
+  - Regex:            '<.*'
+    Priority:         3
+  - Regex:            '.*'
+    Priority:         4
+
+# Trivial 2: Indentation (4-SPACEs)
+AccessModifierOffset: -4
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4 # Awkward without DanglingParentheses: true
+IndentWidth: 4
+IndentPPDirectives: AfterHash

@@ -1,15 +1,14 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
-#ifndef SEEDER_H
-#define SEEDER_H
+#pragma once
 
-#include <random>
 #include <chrono>
 #include <cstdint>
+#include <random>
 
 typedef std::chrono::high_resolution_clock HRClock;
 
-//singleton seed generator
+// singleton seed generator
 class Seeder {
 public:
     Seeder();
@@ -18,9 +17,9 @@ public:
     uint64_t seed();
     void seed(uint64_t s);
     std::default_random_engine& gen();
+
 private:
     static uint64_t _seed;
     static HRClock::time_point _first;
     static std::default_random_engine _gen;
 };
-#endif//SEEDER_H

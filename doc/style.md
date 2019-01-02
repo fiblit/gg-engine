@@ -142,7 +142,6 @@ if it doesn't fit on one line.
 Changes to `.clang-format`:
 
 ```diff
-+AllowAllParametersOfDeclarationOnNextLine: false
 +AllowShortCaseLabelsOnASingleLine: true
 +BreakBeforeBinaryOperators: NonAssignment # Not All to be like structs/funcs
 +ConstructorInitializersAllOnOneLineOrOnePerLine: true
@@ -211,9 +210,13 @@ specify a "package' of data or some kind of data layout:
 Changes to `.clang-format`:
 
 ```diff
++AllowAllParametersOfDeclarationOnNextLine: false
 +BinPackArguments: false
 +BinPackParameters: false
 ```
+
+Note that the `AllowAllParametersOfDeclarationOnNextLine` option should also be
+for function calls, as `rustfmt` would do.
 
 #### Format lambdas like blocks of code
 

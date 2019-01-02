@@ -1,5 +1,7 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
+#pragma once
+
 #include "Mesh.h"
 
 // CubeMesh is equivalent to Mesh except that it enforces what gotes into the

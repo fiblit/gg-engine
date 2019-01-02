@@ -1,24 +1,13 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
-#ifndef IO_H
-#define IO_H
+#pragma once
 
-#include <string>
-#ifdef WIN32
-    #include <optional>
-#else
-    #include <experimental/optional>
-#endif
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
+#include <optional>
+#include <string>
 
-#ifdef WIN32
 std::optional<const std::string> read_file(const std::string path);
-#else
-std::experimental::optional<const std::string> read_file(const std::string path);
-#endif
-
-
 
 struct Image {
     int width;
@@ -27,10 +16,4 @@ struct Image {
     unsigned char* bytes;
 };
 
-#ifdef WIN32
 std::optional<Image> read_image(const std::string image);
-#else
-std::experimental::optional<Image> read_image(const std::string image);
-#endif
-
-#endif//IO_H

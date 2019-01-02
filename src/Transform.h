@@ -1,7 +1,6 @@
 // Copyright (c) 2016-2018 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#pragma once
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -61,5 +60,3 @@ private:
     //node/thing which is being transformed
     //std::shared_ptr<T> socket;
 };
-
-#endif//TRANSFORM_H

@@ -1,7 +1,6 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
-#ifndef UI_H
-#define UI_H
+#pragma once
 
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
@@ -36,5 +35,3 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 //callback for GLFW scrolling events
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 }
-
-#endif
