@@ -36,4 +36,4 @@ void framebuffer_resize(GLFWwindow* w, int width, int height);
 void input_key(GLFWwindow* w, double dt);
 void input_cursor(GLFWwindow* w, double dt);
 void input_scroll(GLFWwindow* w, double dt);
-}
+} // namespace render

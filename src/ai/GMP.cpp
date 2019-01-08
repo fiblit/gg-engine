@@ -10,7 +10,8 @@ PointPath* find_path_astar(
     float e,
     Graph<glm::vec2>* roadmap,
     NodeId s,
-    NodeId g) {
+    NodeId g
+) {
     // for readability
     using namespace std;
     typedef glm::vec2 Point;

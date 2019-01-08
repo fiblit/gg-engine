@@ -4,18 +4,18 @@
 #include <algorithm>
 #include <array>
 
-Rect::Rect() : BoundVolume(glm::vec2(0, 0), volume_type::RECT), _w(0), _h(0) {}
-Rect::Rect(glm::vec2 o, float w, float h) :
+Rect::Rect(): BoundVolume(glm::vec2(0, 0), volume_type::RECT), _w(0), _h(0) {}
+Rect::Rect(glm::vec2 o, float w, float h):
     BoundVolume(o, volume_type::RECT),
     _w(w),
     _h(h) {}
 
-Circ::Circ() : BoundVolume(glm::vec2(0, 0), volume_type::CIRC), _r(0) {}
-Circ::Circ(glm::vec2 o, float r) : BoundVolume(o, volume_type::CIRC), _r(r) {}
+Circ::Circ(): BoundVolume(glm::vec2(0, 0), volume_type::CIRC), _r(0) {}
+Circ::Circ(glm::vec2 o, float r): BoundVolume(o, volume_type::CIRC), _r(r) {}
 
 BoundVolume::~BoundVolume() {}
-BoundVolume::BoundVolume() : _o(glm::vec2(0, 0)), _vt(volume_type::CIRC) {}
-BoundVolume::BoundVolume(glm::vec2 o, volume_type vt) : _o(o), _vt(vt) {}
+BoundVolume::BoundVolume(): _o(glm::vec2(0, 0)), _vt(volume_type::CIRC) {}
+BoundVolume::BoundVolume(glm::vec2 o, volume_type vt): _o(o), _vt(vt) {}
 
 std::vector<BoundVolume*> Circ::minkowski_sum(BoundVolume* bv) {
     if (bv->_vt == volume_type::CIRC) {
@@ -140,7 +140,8 @@ static std::pair<float, float> line_intersect(
     glm::vec2 Lo,
     glm::vec2 Ld,
     glm::vec2 Mo,
-    glm::vec2 Md) {
+    glm::vec2 Md
+) {
     glm::vec2 MLo = Mo - Lo;
     float s = (Ld.x * MLo.y - Ld.y * MLo.x) / (Md.x * Ld.y - Md.y * Ld.x);
     float t;
@@ -156,7 +157,7 @@ bool Rect::line_of_sight(
     glm::vec2 start,
     glm::vec2 /*end*/,
     glm::vec2 La_to_b,
-    float len2 //
+    float len2
 ) {
     // dims
     float l = _o.x - _w / 2;
@@ -184,11 +185,12 @@ bool Rect::line_of_sight(
                 start,
                 La_to_b / sqrtf(len2),
                 edge.second,
-                edge.first - edge.second //
+                edge.first - edge.second
             );
             return hit(hit_clamp<on_line>(result.second))
                 && hit(hit_clamp<on_ray>(result.first));
-        });
+        }
+    );
 }
 
 // assumes axis alignment

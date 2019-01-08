@@ -35,7 +35,7 @@ private:
 };
 
 template <class T>
-inline Graph<T>::Graph() : _vertices({}), _edges({}), _idx_counter(0) {}
+inline Graph<T>::Graph(): _vertices({}), _edges({}), _idx_counter(0) {}
 
 template <class T> inline NodeId Graph<T>::add_vertex(const T& v) {
     _vertices[_idx_counter] = v;

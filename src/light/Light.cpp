@@ -2,7 +2,7 @@
 // This file is under the MIT license. See the LICENSE file for details.
 #include "Light.h"
 
-Light::Light() :
+Light::Light():
     _ambient(glm::vec3(0, 0, 0)),
     _diffuse(glm::vec3(0, 0, 0)),
     _specular(glm::vec3(0, 0, 0)) {}

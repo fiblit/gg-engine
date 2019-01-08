@@ -4,7 +4,7 @@
 
 #include "Light.h"
 
-class DirLight : public Light {
+class DirLight: public Light {
 public:
     DirLight();
 

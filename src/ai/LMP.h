@@ -23,14 +23,14 @@ glm::vec2 ttc_forces(
     Dynamics& da,
     BoundVolume& bva,
     BoundVolume& bvb,
-    float ttc //
+    float ttc
 );
 glm::vec2 ttc_forces(
     Dynamics& da,
     BoundVolume& bva,
     Dynamics& db,
     BoundVolume& bvb,
-    float ttc //
+    float ttc
 );
 glm::vec2 calc_sum_force(
     Entity* e,

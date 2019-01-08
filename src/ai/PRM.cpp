@@ -25,8 +25,8 @@ void PRM::connect() {
         auto near = nearby(v);
         for (NodeId i : *near) {
             // if the nearby points are within line of sight
-            if (_cspace->line_of_sight(
-                    *_roadmap->data(v), *_roadmap->data(i)) //
+            if ( //
+                _cspace->line_of_sight(*_roadmap->data(v), *_roadmap->data(i))
             ) {
                 // directed because we'll traverse the other side in for_vertex
                 _roadmap->add_dir_edge(v, i);
@@ -56,8 +56,9 @@ void PRM::sample_space() {
                 // nudge until out of something; could theoretically take a
                 // while only do this if perturb is not 0.
                 bool collides = false;
-                while ((collides = _cspace->collides(sample))
-                       && abs(_perturb) > 0 //
+                while ( //
+                    abs(_perturb) > 0 //
+                    && (collides = _cspace->collides(sample))
                 ) {
                     sample += glm::vec2(perturber(s.gen()), perturber(s.gen()));
                     sample = glm::clamp(sample, _lo_bound, _hi_bound);
@@ -80,8 +81,8 @@ PRM::PRM(
     int bin_samp,
     glm::vec2 lo_bound,
     glm::vec2 hi_bound,
-    float variance //
-) :
+    float variance
+):
     _cspace(std::move(cspace)),
     _threshold(threshold),
     _perturb(perturb),
@@ -89,8 +90,7 @@ PRM::PRM(
     _bin_samp(bin_samp),
     _lo_bound(lo_bound),
     _hi_bound(hi_bound),
-    _variance(variance) //
-{
+    _variance(variance) {
     _roadmap = std::make_unique<Graph<glm::vec2>>();
     sample_space();
     connect();

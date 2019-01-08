@@ -6,7 +6,7 @@
 using namespace std;
 using namespace glm;
 
-Transform::Transform(const Transform* p) :
+Transform::Transform(const Transform* p):
     _parent(p),
     _children(0),
     _transform(glm::mat4(1.f)) {}

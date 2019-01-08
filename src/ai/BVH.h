@@ -46,14 +46,14 @@ private:
     struct Index {
         unsigned obj; // object/this
         unsigned oth; // other
-        Index() : obj(0), oth(0){};
-        Index(unsigned obj_, unsigned oth_) : obj(obj_), oth(oth_){};
+        Index(): obj(0), oth(0) {}
+        Index(unsigned obj_, unsigned oth_): obj(obj_), oth(oth_) {}
     };
 
     void construct_(
         std::vector<Entity*> objects,
         std::vector<Index> sorted_x,
-        std::vector<Index> sorted_Z //
+        std::vector<Index> sorted_Z
     );
     void split_(
         std::vector<Index>& sorted_a,
@@ -61,7 +61,7 @@ private:
         std::vector<Index>& a_lhs,
         std::vector<Index>& b_lhs,
         std::vector<Index>& a_rhs,
-        std::vector<Index>& b_rhs //
+        std::vector<Index>& b_rhs
     );
 };
 

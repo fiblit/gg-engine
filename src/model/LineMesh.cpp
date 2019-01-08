@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-LineMesh::LineMesh(const Mesh& m) : Mesh(m.vertices, m.indices, {}) {
+LineMesh::LineMesh(const Mesh& m): Mesh(m.vertices, m.indices, {}) {
     vertices = m.vertices;
     indices = m.indices;
     textures = {};
@@ -21,8 +21,9 @@ LineMesh::LineMesh(const Mesh& m) : Mesh(m.vertices, m.indices, {}) {
 
 LineMesh::LineMesh(
     const std::vector<Vertex>& endpoints,
-    const std::vector<GLuint>& lines //
-) : Mesh(endpoints, lines, {}) {
+    const std::vector<GLuint>& lines
+):
+    Mesh(endpoints, lines, {}) {
     gen();
     glBindVertexArray(vao);
     bind();
@@ -38,7 +39,7 @@ void LineMesh::set_material(
     float sh,
     glm::vec3 ambient,
     glm::vec3 d,
-    glm::vec3 s //
+    glm::vec3 s
 ) {
     UNUSED(sh, d, s);
     mtl = material;
@@ -56,6 +57,7 @@ void LineMesh::draw() {
     mtl->set("material.color.diffuse", _diffuse);
     mtl->set("material.color.specular", _specular);
     glDrawElements(
-        GL_LINES, static_cast<int>(indices.size()), GL_UNSIGNED_INT, nullptr);
+        GL_LINES, static_cast<int>(indices.size()), GL_UNSIGNED_INT, nullptr
+    );
     glBindVertexArray(0);
 }

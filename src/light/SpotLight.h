@@ -4,7 +4,7 @@
 
 #include "PointLight.h"
 
-class SpotLight : public PointLight {
+class SpotLight: public PointLight {
 public:
     SpotLight();
 

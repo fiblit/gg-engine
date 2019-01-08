@@ -4,4 +4,4 @@
 namespace physics {
 void init();
 void simulate(float dt);
-}
+} // namespace physics

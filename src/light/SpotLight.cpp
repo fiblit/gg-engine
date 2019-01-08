@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-SpotLight::SpotLight() :
+SpotLight::SpotLight():
     _dir(glm::vec3(0, 0, 1)),
     _cutoff_100p(glm::cos(glm::radians(20.f))),
     _cutoff_0p(glm::cos(glm::radians(30.f))) {}

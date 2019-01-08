@@ -37,7 +37,7 @@ static void create_wall(
     Entity& e,
     vector<Texture> texs,
     glm::vec2 pos,
-    float h //
+    float h
 ) {
     uint16_t tid = POOL.create<Transform>(Transform(nullptr));
     uint16_t mid = POOL.create<Mesh>(CubeMesh(texs));
@@ -158,7 +158,8 @@ void init() {
             POOL.spawn_entity(),
             wall_tex,
             glm::vec2(map(s.gen()), map(s.gen())),
-            tall(s.gen()));
+            tall(s.gen())
+        );
     }
 
     {
@@ -174,12 +175,14 @@ void init() {
     for (unsigned i = 0; i < 8; ++i) {
         render::point_lights.push_back(make_unique<PointLight>());
         render::point_lights.back()->pos(
-            glm::vec3(map(s.gen()), y_dist(s.gen()), map(s.gen())));
+            glm::vec3(map(s.gen()), y_dist(s.gen()), map(s.gen()))
+        );
         render::point_lights.back()->att_to_dist(1000);
         render::point_lights.back()->ambient(glm::vec3(0.f));
         render::point_lights.back()->diffuse(
             glm::vec3(.5f)
-            + glm::vec3(tweak(s.gen()), tweak(s.gen()), tweak(s.gen())));
+            + glm::vec3(tweak(s.gen()), tweak(s.gen()), tweak(s.gen()))
+        );
         render::point_lights.back()->specular(glm::vec3(1.f));
     }
 }

@@ -28,14 +28,14 @@ public:
     Mesh(
         const std::vector<Vertex>& vertices,
         const std::vector<GLuint>& indices,
-        const std::vector<Texture>& textures //
+        const std::vector<Texture>& textures
     );
     virtual void set_material(
         Shader* material,
         float shininess,
         glm::vec3 ambient = glm::vec3(0),
         glm::vec3 diffuse = glm::vec3(0),
-        glm::vec3 specular = glm::vec3(0) //
+        glm::vec3 specular = glm::vec3(0)
     );
     virtual void draw();
 

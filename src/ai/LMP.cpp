@@ -112,7 +112,7 @@ glm::vec2 LMP::ttc_forces(
     Dynamics& da,
     BoundVolume& bva,
     BoundVolume& bvb,
-    float ttc //
+    float ttc
 ) {
     glm::vec2 V_dt(da.vel.x * ttc, da.vel.z * ttc);
     glm::vec2 dir = (bva._o + V_dt - bvb._o);
@@ -123,7 +123,7 @@ glm::vec2 LMP::ttc_forces(
     BoundVolume& bva,
     Dynamics& db,
     BoundVolume& bvb,
-    float ttc //
+    float ttc
 ) {
     glm::vec2 V_dt(da.vel.x * ttc, da.vel.z * ttc);
     glm::vec2 bV_dt(db.vel.x * ttc, db.vel.z * ttc);
@@ -184,7 +184,7 @@ boid->dyn->vel.z)) / (fi + 1.f);
             avg_pos = (avg_pos * fi + glm::vec2(boid->bv->o)) / (fi + 1.f);
         }
 
-        // Seperation force //
+        // Seperation force
         //force from inverted direction of nearest neighbours
         glm::vec2 toBoid = boid->bv->o - a->bv->o;
         float dist2_to_boid = glm::dot(toBoid, toBoid);
@@ -194,7 +194,7 @@ boid->dyn->vel.z)) / (fi + 1.f);
         }
     }
 
-    // alignnment force //
+    // alignnment force
     //average velocity; pull towards that
     float norm = glm::length(avg_vel);
     if (norm != 0) {
@@ -203,7 +203,7 @@ boid->dyn->vel.z)) / (fi + 1.f);
     align_force = (avg_vel - glm::vec2(a->dyn->vel.x, a->dyn->vel.z)) *
 boid_speed;
 
-    // cohesion force //
+    // cohesion force
     //average cohesion; pull towards that
     cohesion_force = avg_pos - a->bv->o;
 
@@ -221,7 +221,7 @@ glm::vec2 LMP::calc_sum_force(
     BVH* static_bvh,
     BVH* dynamic_bvh,
     std::vector<Entity*>, // statics
-    std::vector<Entity*> //
+    std::vector<Entity*>
 ) { // dynamics
     float speed = 1.0f; // x m/s
     glm::vec2 goal_vel;
@@ -253,7 +253,8 @@ glm::vec2 LMP::calc_sum_force(
     glm::vec2 vel2d(d.vel.x, d.vel.z);
     Circ q(
         bv._o + vel2d * .5f,
-        real_speed * .5f * static_cast<float>(TTC_THRESHOLD));
+        real_speed * .5f * static_cast<float>(TTC_THRESHOLD)
+    );
 
     std::vector<Entity*> NNdynamic = dynamic_bvh->query(&q);
     for (Entity* nearby : NNdynamic) {
@@ -265,10 +266,8 @@ glm::vec2 LMP::calc_sum_force(
             continue;
         }
         double ttc = LMP::ttc(
-            bv,
-            glm::vec2(d.vel.x, d.vel.z),
-            bbv,
-            glm::vec2(bd.vel.x, bd.vel.z));
+            bv, glm::vec2(d.vel.x, d.vel.z), bbv, glm::vec2(bd.vel.x, bd.vel.z)
+        );
         if (ttc > TTC_THRESHOLD) { // seconds
             continue;
         }

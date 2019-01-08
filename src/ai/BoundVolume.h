@@ -24,7 +24,7 @@ public:
         glm::vec2 a,
         glm::vec2 b,
         glm::vec2 Lab,
-        float len2 //
+        float len2
     ) = 0;
     virtual float intersect(glm::vec2 bo, glm::vec2 v) = 0;
     virtual std::vector<BoundVolume*> minkowski_sum(BoundVolume*) = 0;
@@ -35,7 +35,7 @@ protected:
     BoundVolume(glm::vec2 o, volume_type vt);
 };
 
-class Rect : public BoundVolume {
+class Rect: public BoundVolume {
 public:
     Rect();
     Rect(glm::vec2 o, float w, float h);
@@ -56,7 +56,7 @@ private:
         glm::vec2 p1,
         glm::vec2 p2,
         glm::vec2 p3,
-        glm::vec2 p4 //
+        glm::vec2 p4
     );
     // axis = 0: the line is x = val {oValLo < y < oValHi} // vertical
     // axis = 1: the line is y = val {oValLo < x < oValHi} // horizontal
@@ -72,7 +72,7 @@ private:
     );
 };
 
-class Circ : public BoundVolume {
+class Circ: public BoundVolume {
 public:
     Circ();
     Circ(glm::vec2 o, float r);

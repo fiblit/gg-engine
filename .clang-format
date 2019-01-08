@@ -15,19 +15,26 @@ AlignOperands: false
 AlignTrailingComments: false
 AlwaysBreakBeforeMultilineStrings: true
 BreakConstructorInitializers: AfterColon # No Visual Indent!
-PointerAlignment: Left
 PenaltyReturnTypeOnItsOwnLine: 1000 # Awkward without DanglingParentheses: true
 
 # Important 2: Semantic Lists should look like Typographic Lists
 AllowShortCaseLabelsOnASingleLine: true
 BreakBeforeBinaryOperators: NonAssignment # Not All to be like structs/funcs
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
-# DanglingParentheses: true
+DanglingParenthesis: true # only with the 8.0.0 fork
 
 # Important 3: Semantic Blocks should look like typographic block-indents
 AllowAllParametersOfDeclarationOnNextLine: false
+# AllowAllArgumentsOfCallOnNextLine: false # only with future 8.0.0 fork
 BinPackArguments: false
 BinPackParameters: false
+# BinPackOperators: false # only with future 8.0.0 fork
+# ChainAlignment: AlwaysBreak # only with future 8.0.0 fork
+
+# Important 4: Alignment of Syntax
+PointerAlignment: Left
+SpaceBeforeCtorInitializerColon: false # only with 8.0.0
+SpaceBeforeInheritanceColon: false # only with 8.0.0
 
 # High-Level 1: Header Include Order
 IncludeCategories:

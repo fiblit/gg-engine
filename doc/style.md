@@ -7,38 +7,43 @@
 1. Be consistent more than anything else.
 1. Code is read/diffed more often than it is written.
 1. Write code for a future you (with amnesia, dyslexia, and malice.)
-    > "You know you're brilliant but maybe you'd like to understand what you did
-    > 2 weeks from now."
-    > Linus Torvalds
+   > "You know you're brilliant but maybe you'd like to understand what you did
+   > 2 weeks from now."
+   > Linus Torvalds
 1. Explicit over Implicit.
 1. Flat over Nested
 
-    So, present important information on the **left**.
+   So, present important information on the **left**.
+
 1. Straightforward over Convoluted.
 
-    So, prefer vertically compacted information as is reasonable.
+   So, prefer vertically compacted information as is reasonable.
+
 1. Errors AND warnings (from gcc/clang/engine) should be loud.
 1. Typography implies Semantics.
 1. Prefer being language-idiomatic unless it hampers requirements.
 1. You can effectively follow the Rust variant of PEP-8 except applying it to
-  C++ with LLVM's high-level heuristics; however, minor influences come from
-  AirBnB JS, Lua, Markdown, and Mozilla:
-    - [Rust](https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md)
-    - [Pythonic PEP-8](https://www.python.org/dev/peps/pep-0008/)
-    - [LLVM](https://llvm.org/docs/CodingStandards.html)
-    - [AirBnB JS](https://github.com/airbnb/javascript)
-    - [Lua](http://lua-users.org/wiki/LuaStyleGuide)
-    - [Mozilla](https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Coding_Style)
+   C++ with LLVM's high-level heuristics; however, influences come from Prettier,
+   AirBnB JS, Black, Lua, Markdown, and Mozilla:
 
-    Note, my style is meant to be cross-linguistically useful, so I remove any
-    project specific things. LLVM, however, has many style points that I
-    virtually copy to here.
+   - [Rust](https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md)
+   - [Pythonic PEP-8](https://www.python.org/dev/peps/pep-0008/)
+   - [LLVM](https://llvm.org/docs/CodingStandards.html)
+   - [Prettier](https://prettier.io/)
+   - [AirBnB JS](https://github.com/airbnb/javascript)
+   - [Black](https://black.readthedocs.io/en/stable/)
+   - [Lua](http://lua-users.org/wiki/LuaStyleGuide)
+   - [Mozilla](https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Coding_Style)
 
-    Changes to `.clang-format`:
+   Note, my style is meant to be cross-linguistically useful, so I remove any
+   project specific things. LLVM, however, has many style points that I
+   virtually copy to here.
 
-    ```diff
-    + BasedOnStyle: LLVM
-    ```
+   Changes to `.clang-format`:
+
+   ```diff
+   + BasedOnStyle: LLVM
+   ```
 
 1. These are only guidelines, so explicitly ignore them if it helps.
 
@@ -71,7 +76,7 @@ functionator(
 );
 ```
 
-*BAD:*
+_BAD:_
 
 ```c++
 functionator(abcdefg,
@@ -109,7 +114,7 @@ Vertical(
 );
 ```
 
-*BAD:*
+_BAD:_
 
 ```c++
 Textual(abcdefg, hijklmn,
@@ -117,6 +122,7 @@ Textual(abcdefg, hijklmn,
 ```
 
 If this "write it as a list" style bothers you, I encourage this heuristic:
+
 > Try creating variables to capture complex arguments with a descriptive name
 
 Thus, you **should** use this:
@@ -126,7 +132,7 @@ int complex_var = complex_expression == complex_expression;
 fun(complex_var, var, i);
 ```
 
-*instead of* this:
+_instead of_ this:
 
 ```c++
 fun(
@@ -145,7 +151,7 @@ Changes to `.clang-format`:
 +AllowShortCaseLabelsOnASingleLine: true
 +BreakBeforeBinaryOperators: NonAssignment # Not All to be like structs/funcs
 +ConstructorInitializersAllOnOneLineOrOnePerLine: true
-+# DanglingParentheses: true
++DanglingParenthesis: true # only with the 8.0.0 fork
 ```
 
 ### Semantic Blocks should look like typographic block-indents
@@ -180,7 +186,7 @@ code;                   //
 ```
 
 An ignorable disadvantage to this style is that vertical space is used faster.
-*Compare:*
+_Compare:_
 
 ```c++
 int funct(parameters, options,   //
@@ -207,12 +213,77 @@ specify a "package' of data or some kind of data layout:
 - Structs stuff variables into a space in memory.
 - Functions stuff arguments into their stack when invoked.
 
+This sort of listing also includes continued control flow expressions, although
+sadly clang-format does not neatly support this without my fork of it. You can
+look at Prettier (and to a similar extent, `rustfmt`) for examples of this. As a
+heuristic, treat the binary operators as the comma in a function definition,
+except place them at the start of lines (because knowing which operator is used
+is important).
+
+**GOOD:**
+
+```c++
+while ( // blank comments needed for non-forked clang-format
+    foobarbaz > 0
+    && rumpus_fumpus_doodle_doo->foo(barballer) //
+    && x
+) {
+    code();
+    code();
+}
+```
+
+_BAD:_
+
+```c++
+while (foobarbaz > 0
+       && rumpus_fumpus_doodle_doo->foo(barballer) && x) {
+    code();
+    code();
+}
+```
+
+Furthermore, this includes continued dot-chains or lessless-chains. Again,
+clang-format does not natively support this in 8.0.0, so it's best to look at
+Prettier or `rustfmt` for this.
+
+**GOOD:**
+
+```c++
+foobarbaz  // blank comment needed without fork of 8.0.0
+    .foobar()
+    .foobar()
+    .foobar()
+    .foobar()
+    .foobar();
+
+foobarbaz //
+    << MAJOR_VERSION_NUMBER << "."
+    << MINOR_VERSION_NUMBER << "\n";
+```
+
+_BAD:_
+
+```c++
+foobarbaz.foobar()
+    .foobar()
+    .foobar()
+    .foobar()
+    .foobar();
+
+foobarbaz << MAJOR_VERSION_NUMBER << "."
+          << MINOR_VERSION_NUMBER << "\n";
+```
+
 Changes to `.clang-format`:
 
 ```diff
 +AllowAllParametersOfDeclarationOnNextLine: false
++# AllowAllArgumentsOfCallOnNextLine: false # only with future 8.0.0 fork
 +BinPackArguments: false
 +BinPackParameters: false
++# BinPackOperators: false # only with future 8.0.0 fork
++# ChainAlignment: AlwaysBreak # only with future 8.0.0 fork
 ```
 
 Note that the `AllowAllParametersOfDeclarationOnNextLine` option should also be
@@ -225,6 +296,62 @@ needs_callback(42, args, [&]() {
     code;
     return 4;
 });
+```
+
+### Alignment of Syntax
+
+The semantics of these expressions are implied from the appropriate typography,
+as encouraged by Principle 8.
+
+Left-align colons followed by a list as this is the grammatical English way of
+using a colon as an enumerator or label. For colons which act more as a
+partition or ratio, use spaces on both sides, except double colons as those
+chain or concatenate together two things.
+
+Left-align pointer and reference types, as it is more appropriate to think of
+the identifier as a pointer to something, rather than the dereferenced
+identifier being the something.
+
+**GOOD:**
+
+```c++
+class Foo: public Bar {
+public:
+    Foo(int* i, std::vector<int> v): _x(*i > 0 ? -1 : 1), _v(v) {
+        for (auto& j : _v) {
+            j += _x;
+        }
+    };
+private:
+    int _x;
+    std::vector<int> _v;
+};
+```
+
+_BAD:_
+
+```c++
+class Foo : public Bar {
+public :
+    Foo(int *i, std :: vector<int> v) : _x(*i > 0 ? -1:1) {
+        for (auto& j: v) {
+            j += _x;
+        }
+        _v = v;
+    };
+private :
+    int _x;
+    std :: vector<int> _v;
+};
+
+```
+
+Changes to `.clang-format`:
+
+```diff
++PointerAlignment: Left
++SpaceBeforeCtorInitializerColon: false # only with 8.0.0
++SpaceBeforeInheritanceColon: false # only with 8.0.0
 ```
 
 ### One Line implies roughly one logical unit
@@ -354,10 +481,10 @@ Case definition:
 
 - Normal: HTML, C-Space, Two Words
 - snake_case: html, cspace, two_words
-- _leading_case: _html, _cspace, _two_words
+- \_leading_case: \_html, \_cspace, \_two_words
 - SCREAM_CASE: HTML, CSPACE, TWO_WORDS
 - CamelCase: Html, Cspace, TwoWords
-- trailing_case_: html_, cspace_, two_words_
+- trailing_case\_: html\_, cspace\_, two_words\_
 - nonecase: html, cspace, twowords
 
 Generally, values = snake_case and Types = CamelCase
@@ -366,14 +493,14 @@ Generally, values = snake_case and Types = CamelCase
 - Namespaces: nonecase
 - Functions:
   - Methods: snake_case
-  - Private Methods: _leading_case
+  - Private Methods: \_leading_case
   - Namespaced: snake_case
   - Globals: SCREAM_CASE
-  - File Static: _leading_case
+  - File Static: \_leading_case
   - Getter (rare): Type var_name()
   - Setter (rare): void var_name(Type v)
 - Variables:
-  - Private Members: _leading_case
+  - Private Members: \_leading_case
   - Locals: snake_case
   - Globals: SCREAM_CASE
   - Iters: i j k
@@ -384,9 +511,9 @@ Generally, values = snake_case and Types = CamelCase
   - File: f
 
 To clarify word boundaries, if it was originally hyphenated, use one word.
-e.g. Configuration-space -> C-Space -> _cspace
+e.g. Configuration-space -> C-Space -> \_cspace
 If it's an acronym, treat like one word.
-Hyper Text Markup Language -> HTML -> _html
+Hyper Text Markup Language -> HTML -> \_html
 Probabilistic Roadmap -> PRM -> Prm
 
 ### Use `#pragma once` instead of header guards
@@ -416,7 +543,8 @@ Especially helpful for redudant lines or generics
 
 ### Use predicate functions instead of predicate loops
 
-The LLVM style guide [gives good reasoning](https://llvm.org/docs/CodingStandards.html#turn-predicate-loops-into-predicate-functions) for this.
+The LLVM style guide [gives good reasoning](https://llvm.org/docs/CodingStandards.html#turn-predicate-loops-into-predicate-functions)
+for this.
 
 **GOOD:**
 
@@ -431,7 +559,7 @@ It's even better to write a function for predicates you often use. I may also
 write a wrapper library for `<algorithm>` whose API looks closer to this:
 `std::is_sorted(iterable, /* ComparePred */);`
 
-*BAD:*
+_BAD:_
 
 ```c++
 std::array<int, 5> a = {5, 4, 3, 1, 2};
@@ -443,12 +571,12 @@ for (unsigned i = 0; i < a.size() - 1; ++i) {
 }
 ```
 
-### *DO NOT* use `using` in a header at an outer namespace/global scope
+### _DO NOT_ use `using` in a header at an outer namespace/global scope
 
 However, using any "using" is typically avoided except for exceptional
 readibility issues. (This is an awkward trade-off between P2. and P1.)
 
-### *NEVER* `#include <iostream>` either use `fmt` or `cstdio`
+### _NEVER_ `#include <iostream>` either use `fmt` or `cstdio`
 
 iostream is slow, excessive, and has no clear benefits
 
@@ -465,7 +593,7 @@ public:
 };
 ```
 
-*BAD:*
+_BAD:_
 
 ```c++
 class Foo {
@@ -490,7 +618,7 @@ They are performant, and they don't hurt readability
 
 ### Line Length
 
-Max 80 char lines. I like to split my screen a lot. Helps with P4., too.  I'm
+Max 80 char lines. I like to split my screen a lot. Helps with P4., too. I'm
 fine with specific projects or regions using 100 char lines, though.
 
 ### Indentation
@@ -537,7 +665,7 @@ if (foo < bar) {
 }
 ```
 
-*BAD:*
+_BAD:_
 
 ```c++
 if(foo < bar){
@@ -571,7 +699,7 @@ if (!a) {
 }
 ```
 
-*BAD:*
+_BAD:_
 
 ```c++
 if (a != nullptr) {

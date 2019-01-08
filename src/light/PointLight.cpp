@@ -2,7 +2,7 @@
 // This file is under the MIT license. See the LICENSE file for details.
 #include "PointLight.h"
 
-PointLight::PointLight() : _pos(glm::vec3(0, 0, 0)) { att_to_dist(30.); }
+PointLight::PointLight(): _pos(glm::vec3(0, 0, 0)) { att_to_dist(30.); }
 
 void PointLight::pass_to(Shader& shader, const std::string& id) {
     Light::pass_to(shader, id);

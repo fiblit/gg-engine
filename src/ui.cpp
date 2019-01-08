@@ -70,4 +70,4 @@ void mouse_callback(GLFWwindow* w, double xpos, double ypos) {
 void scroll_callback(GLFWwindow*, double, double yoffset) {
     d_scroll = static_cast<float>(yoffset);
 }
-}
+} // namespace ui

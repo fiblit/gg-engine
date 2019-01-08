@@ -10,12 +10,11 @@ using namespace std;
 Mesh::Mesh(
     const vector<Vertex>& verts,
     const vector<GLuint>& idxs,
-    const vector<Texture>& texs //
-) :
+    const vector<Texture>& texs
+):
     vertices(verts),
     indices(idxs),
-    textures(texs) //
-{
+    textures(texs) {
     gen(); // need some bufs
     glBindVertexArray(vao); // remember this sequence
     bind(); // use the generated bufs
@@ -51,7 +50,7 @@ void Mesh::attrib() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<void*>(offsetof(Vertex, norm)) //
+        reinterpret_cast<void*>(offsetof(Vertex, norm))
     );
     glEnableVertexAttribArray(1);
 
@@ -62,7 +61,7 @@ void Mesh::attrib() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<void*>(offsetof(Vertex, tex)) //
+        reinterpret_cast<void*>(offsetof(Vertex, tex))
     );
     glEnableVertexAttribArray(2);
 }
@@ -72,13 +71,13 @@ void Mesh::buffer() {
         GL_ARRAY_BUFFER,
         static_cast<long int>(vertices.size() * sizeof(Vertex)),
         &vertices[0],
-        GL_STATIC_DRAW //
+        GL_STATIC_DRAW
     );
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
         static_cast<long int>(indices.size() * sizeof(GLuint)),
         &indices[0],
-        GL_STATIC_DRAW //
+        GL_STATIC_DRAW
     );
 }
 
@@ -100,7 +99,7 @@ void Mesh::bind_textures() {
         unsigned count = ++map_count[static_cast<unsigned>(t)];
         mtl->set(
             "material." + texmap_to_string(t) + to_string(count),
-            static_cast<GLint>(i) //
+            static_cast<GLint>(i)
         );
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
@@ -120,7 +119,7 @@ void Mesh::set_material(
     float shininess,
     glm::vec3 ambient,
     glm::vec3 diffuse,
-    glm::vec3 specular //
+    glm::vec3 specular
 ) {
     mtl = material;
     _shininess = shininess;
@@ -142,10 +141,7 @@ void Mesh::draw() {
     mtl->set("material.color.diffuse", _diffuse);
     mtl->set("material.color.specular", _specular);
     glDrawElements(
-        GL_TRIANGLES,
-        static_cast<int>(indices.size()),
-        GL_UNSIGNED_INT,
-        nullptr //
+        GL_TRIANGLES, static_cast<int>(indices.size()), GL_UNSIGNED_INT, nullptr
     );
     unbind_textures();
     glBindVertexArray(0);

@@ -56,7 +56,7 @@ int main(int, char**) {
         glfwGetVersion(&major, &minor, &revision);
         clog //
             << "gg. GLFW running as v" //
-            << major << "." << minor << "." << revision << "\n"
+            << major << "." << minor << "." << revision << "\n" //
             << "gg. GLFW version string " << glfwGetVersionString() << "\n";
     }
 
@@ -89,9 +89,7 @@ int main(int, char**) {
     }
     // center window
     glfwSetWindowPos(
-        window,
-        mode0->width / 2 - size.x / 2,
-        mode0->height / 2 - size.y / 2 //
+        window, mode0->width / 2 - size.x / 2, mode0->height / 2 - size.y / 2
     );
     glfwSetFramebufferSizeCallback(window, render::framebuffer_resize);
     glfwMakeContextCurrent(window);

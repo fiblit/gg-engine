@@ -41,7 +41,8 @@ void init() {
             obs_bv.push_back(*POOL.get<BoundVolume*>(*s));
         }
         std::unique_ptr<Cspace2d> cs(
-            new Cspace2d(obs_bv, &**POOL.get<BoundVolume*>(*dynamics[0])));
+            new Cspace2d(obs_bv, &**POOL.get<BoundVolume*>(*dynamics[0]))
+        );
         std_cspace = cs.get();
 
         // prm

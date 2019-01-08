@@ -4,7 +4,7 @@
 
 Pool POOL;
 
-template <typename T> DataTable<T>::DataTable() : _table(), _count(0) {}
+template <typename T> DataTable<T>::DataTable(): _table(), _count(0) {}
 
 template <typename T> uint16_t DataTable<T>::create(T&& t) {
     // nothing should ever be assigned 0.
@@ -12,7 +12,7 @@ template <typename T> uint16_t DataTable<T>::create(T&& t) {
     _table.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(_count),
-        std::forward_as_tuple(0, std::move(t)) //
+        std::forward_as_tuple(0, std::move(t))
     );
     return _count;
 }
@@ -44,7 +44,7 @@ void DataTable<T>::for_(std::function<void(T&, uint16_t)> f) {
     }
 }
 
-Pool::Pool() :
+Pool::Pool():
     _entity_table(),
     _entity_count(0),
     _transform_table(),
@@ -61,7 +61,7 @@ Entity& Pool::spawn_entity() {
     auto spawn = _entity_table.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(_entity_count),
-        std::forward_as_tuple(_entity_count) //
+        std::forward_as_tuple(_entity_count)
     );
     return spawn.first->second;
 }
@@ -152,12 +152,14 @@ template void Pool::attach<Agent>(Entity& e, uint16_t);
 
 template <typename T> void Pool::for_(std::function<void(T&, Entity&)> f) {
     _table<T>().for_([&f, this](T& t, uint16_t eid) {
-        f(t, _entity_table.at(eid)); //
+        f(t, _entity_table.at(eid));
     });
 }
+
+// clang-format off
 template void Pool::for_<Transform>(std::function<void(Transform&, Entity&)>);
 template void Pool::for_<Mesh>(std::function<void(Mesh&, Entity&)>);
 template void Pool::for_<Dynamics>(std::function<void(Dynamics&, Entity&)>);
-template void Pool::for_<BoundVolume*>(
-    std::function<void(BoundVolume*&, Entity&)>);
+template void Pool::for_<BoundVolume*>(std::function<void(BoundVolume*&, Entity&)>);
 template void Pool::for_<Agent>(std::function<void(Agent&, Entity&)>);
+// clang-format on

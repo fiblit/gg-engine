@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Shader::Shader() : program(0), success(false) {}
+Shader::Shader(): program(0), success(false) {}
 
 Shader::~Shader() {
     for (auto& sobj : shader_objects) {

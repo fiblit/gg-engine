@@ -3,7 +3,7 @@
 #include "BVH.h"
 #include "Pool.h"
 
-BVH::BVH() : o(nullptr), right(nullptr) {}
+BVH::BVH(): o(nullptr), right(nullptr) {}
 
 // strongly assumes that every Entity has a BV.
 BVH::BVH(std::vector<Entity*> objects) {
@@ -140,7 +140,7 @@ size_t BVH::size() { return size_; }
 void BVH::construct_(
     std::vector<Entity*> objects,
     std::vector<Index> sorted_x,
-    std::vector<Index> sorted_z //
+    std::vector<Index> sorted_z
 ) {
     assert(sorted_x.size() == sorted_z.size());
     assert(sorted_x.size() >= 1);
@@ -209,7 +209,7 @@ void BVH::split_(
     std::vector<Index>& a_lhs,
     std::vector<Index>& b_lhs,
     std::vector<Index>& a_rhs,
-    std::vector<Index>& b_rhs //
+    std::vector<Index>& b_rhs
 ) {
     assert(sorted_a.size() == sorted_b.size());
     unsigned half =

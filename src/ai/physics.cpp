@@ -46,12 +46,12 @@ void simulate(float dt) {
             // float first = std::numeric_limits<float>::max();
 
             std::vector<Entity*> in_dyn = ai::dynamic_bvh->query(*bv);
-            // for (Entity* c : in_dyn) {
+            // for (Entity* c: in_dyn) {
             // first = std::min(first, find_collision_point(bv, next_p, c));
             //}
 
             std::vector<Entity*> in_st = ai::static_bvh->query(*bv);
-            // for (Entity* c : in_st) {
+            // for (Entity* c: in_st) {
 
             //    first = std::min(first, find_collision_point(bv, next_p, c));
             //}
