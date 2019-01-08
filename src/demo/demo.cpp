@@ -1,16 +1,16 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
 #include "demo.h"
-#include "model/CubeMesh.h"
-#include "light/PointLight.h"
-#include "light/DirLight.h"
-#include "util/debug.h"
 #include "Pool.h"
+#include "light/DirLight.h"
+#include "light/PointLight.h"
+#include "model/CubeMesh.h"
 #include "render.h"
 #include "util/Seeder.h"
+#include "util/debug.h"
 
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <string>
@@ -33,7 +33,12 @@ static void create_floor(Entity& e, vector<Texture> texs) {
     POOL.attach<Mesh>(e, mid);
 }
 
-static void create_wall(Entity& e, vector<Texture> texs, glm::vec2 pos, float h) {
+static void create_wall(
+    Entity& e,
+    vector<Texture> texs,
+    glm::vec2 pos,
+    float h
+) {
     uint16_t tid = POOL.create<Transform>(Transform(nullptr));
     uint16_t mid = POOL.create<Mesh>(CubeMesh(texs));
     uint16_t bvid = POOL.create<BoundVolume*>(new Rect(pos, 1.f, 1.f));
@@ -52,8 +57,8 @@ static void create_wall(Entity& e, vector<Texture> texs, glm::vec2 pos, float h)
 
 constexpr unsigned NUM_ROBOS = 100;
 constexpr unsigned NUM_WALLS = 100;
-constexpr float rot_s = 0;//sin(1.f/NUM_ROBOS * glm::pi<float>());
-constexpr float rot_c = 1;//cos(1.f/NUM_ROBOS * glm::pi<float>());
+constexpr float rot_s = 0; // sin(1.f/NUM_ROBOS * glm::pi<float>());
+constexpr float rot_c = 1; // cos(1.f/NUM_ROBOS * glm::pi<float>());
 constexpr float rot_robo[4] = {rot_c, -rot_s, rot_s, rot_c};
 
 static void create_robo(Entity& e, vector<Texture> texs, glm::vec2 pos) {
@@ -74,7 +79,7 @@ static void create_robo(Entity& e, vector<Texture> texs, glm::vec2 pos) {
     d.mass = 1.f;
 
     auto& a = *POOL.get<Agent>(aid);
-    //a.final_goal = -(glm::make_mat2(rot_robo) * pos);
+    // a.final_goal = -(glm::make_mat2(rot_robo) * pos);
     if (fabs(pos.x) > abs(pos.y))
         a.final_goal = glm::vec2(-pos.x, pos.y);
     else
@@ -89,18 +94,21 @@ static void create_robo(Entity& e, vector<Texture> texs, glm::vec2 pos) {
 
 void init() {
     string pwd(PROJECT_SRC_DIR);
-    //so, normally I'd only want one mesh shared amongst many entities, but the
-    //renderer does a for_<Mesh> so I can't do that.
+    // so, normally I'd only want one mesh shared amongst many entities, but the
+    // renderer does a for_<Mesh> so I can't do that.
     vector<Texture> robo_tex = {
         {render::create_tex(pwd + "/res/container2.png"), Texmap::diffuse},
-        {render::create_tex(pwd + "/res/container2_specular.png"), Texmap::specular}
+        {
+            render::create_tex(pwd + "/res/container2_specular.png"),
+            Texmap::specular,
+        },
     };
     vector<Texture> floor_tex = {
-        {render::create_tex(pwd + "/res/stone.jpg"), Texmap::diffuse}
+        {render::create_tex(pwd + "/res/stone.jpg"), Texmap::diffuse},
     };
     vector<Texture> wall_tex = {
         {render::create_tex(pwd + "/res/rust.jpg"), Texmap::diffuse},
-        {render::create_tex(pwd + "/res/rust.jpg"), Texmap::specular}
+        {render::create_tex(pwd + "/res/rust.jpg"), Texmap::specular},
     };
 
     Entity& floors = POOL.spawn_entity();
@@ -108,26 +116,34 @@ void init() {
 
     Entity* robos[NUM_ROBOS];
     float j = 0, k = 0;
-    for (unsigned i = 0; i < NUM_ROBOS/2; ++i) {
+    for (unsigned i = 0; i < NUM_ROBOS / 2; ++i) {
         robos[i] = &POOL.spawn_entity();
-        //float rad = static_cast<float>(i)/NUM_ROBOS * (2.f * glm::pi<float>());
-        if (i%2) {
-            create_robo(*robos[i], robo_tex, glm::vec2(-k-35, j-10));
+        // float rad = static_cast<float>(i)/NUM_ROBOS * (2.f *
+        // glm::pi<float>());
+        if (i % 2) {
+            create_robo(*robos[i], robo_tex, glm::vec2(-k - 35, j - 10));
             ++j;
-            if (j > 20) {j = 0; ++k;}
+            if (j > 20) {
+                j = 0;
+                ++k;
+            }
         } else {
-            create_robo(*robos[i], robo_tex, glm::vec2(k+35, j - 10));
+            create_robo(*robos[i], robo_tex, glm::vec2(k + 35, j - 10));
         }
     }
-    j = 0; k = 0;
-    for (unsigned i = NUM_ROBOS/2; i < NUM_ROBOS; ++i) {
+    j = 0;
+    k = 0;
+    for (unsigned i = NUM_ROBOS / 2; i < NUM_ROBOS; ++i) {
         robos[i] = &POOL.spawn_entity();
-        if (i%2) {
-            create_robo(*robos[i], robo_tex, glm::vec2(k-10, -j-35));
+        if (i % 2) {
+            create_robo(*robos[i], robo_tex, glm::vec2(k - 10, -j - 35));
             ++k;
-            if (k > 20) {k = 0; ++j;}
+            if (k > 20) {
+                k = 0;
+                ++j;
+            }
         } else {
-            create_robo(*robos[i], robo_tex, glm::vec2(k-10, j+35));
+            create_robo(*robos[i], robo_tex, glm::vec2(k - 10, j + 35));
         }
     }
 
@@ -138,9 +154,12 @@ void init() {
     UFD tall(1.f, 3.f);
     UFD map(-25.f, 25.f);
     for (unsigned i = 0; i < NUM_WALLS; ++i) {
-        create_wall(POOL.spawn_entity(), wall_tex,
+        create_wall(
+            POOL.spawn_entity(),
+            wall_tex,
             glm::vec2(map(s.gen()), map(s.gen())),
-            tall(s.gen()));
+            tall(s.gen())
+        );
     }
 
     {
@@ -155,12 +174,15 @@ void init() {
     UFD tweak(-.3f, .3f);
     for (unsigned i = 0; i < 8; ++i) {
         render::point_lights.push_back(make_unique<PointLight>());
-        render::point_lights.back()->pos(glm::vec3(
-            map(s.gen()), y_dist(s.gen()), map(s.gen())));
+        render::point_lights.back()->pos(
+            glm::vec3(map(s.gen()), y_dist(s.gen()), map(s.gen()))
+        );
         render::point_lights.back()->att_to_dist(1000);
         render::point_lights.back()->ambient(glm::vec3(0.f));
-        render::point_lights.back()->diffuse(glm::vec3(.5f)
-            + glm::vec3(tweak(s.gen()), tweak(s.gen()), tweak(s.gen())));
+        render::point_lights.back()->diffuse(
+            glm::vec3(.5f)
+            + glm::vec3(tweak(s.gen()), tweak(s.gen()), tweak(s.gen()))
+        );
         render::point_lights.back()->specular(glm::vec3(1.f));
     }
 }
@@ -178,4 +200,4 @@ void run(double dt, double time) {
         }
     });
 }
-}
+} // namespace demo

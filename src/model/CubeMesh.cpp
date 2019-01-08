@@ -1,8 +1,9 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
 #include "CubeMesh.h"
 
 const std::vector<Vertex> verts = {
+    // clang-format off
     //top (0 - 3)
     {glm::vec3( 0.5,  0.5,  0.5), glm::vec3(0, 1, 0), glm::vec2(0, 0)},
     {glm::vec3( 0.5,  0.5, -0.5), glm::vec3(0, 1, 0), glm::vec2(1, 0)},
@@ -44,7 +45,7 @@ const std::vector<GLuint> idxs = {
      0,  1,  3,
      0,  3,  2,
     //bottom
-     4,  6,  7, 
+     4,  6,  7,
      4,  7,  5,
     //right
      8, 10, 11,
@@ -58,9 +59,9 @@ const std::vector<GLuint> idxs = {
     //backward
     20, 22, 23,
     20, 23, 21
+    // clang-format on
 };
 
-CubeMesh::CubeMesh(std::vector<Texture>& texs)
-        : Mesh(verts, idxs, texs) {
+CubeMesh::CubeMesh(std::vector<Texture>& texs): Mesh(verts, idxs, texs) {
     _type = Type::CUBE;
 }

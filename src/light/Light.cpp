@@ -1,12 +1,11 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
 #include "Light.h"
 
-Light::Light()
-    : _ambient(glm::vec3(0, 0, 0)),
+Light::Light():
+    _ambient(glm::vec3(0, 0, 0)),
     _diffuse(glm::vec3(0, 0, 0)),
-    _specular(glm::vec3(0, 0, 0)) {
-}
+    _specular(glm::vec3(0, 0, 0)) {}
 
 void Light::pass_to(Shader& shader, const std::string& id) {
     shader.use();
@@ -15,21 +14,9 @@ void Light::pass_to(Shader& shader, const std::string& id) {
     shader.set(id + "color.specular", _specular);
 }
 
-glm::vec3 Light::ambient() {
-    return _ambient;
-}
-void Light::ambient(glm::vec3 ambient) {
-    _ambient = ambient;
-}
-glm::vec3 Light::diffuse() {
-    return _diffuse;
-}
-void Light::diffuse(glm::vec3 diffuse) {
-    _diffuse = diffuse;
-}
-glm::vec3 Light::specular() {
-    return _specular;
-}
-void Light::specular(glm::vec3 specular) {
-    _specular = specular;
-}
+glm::vec3 Light::ambient() { return _ambient; }
+void Light::ambient(glm::vec3 ambient) { _ambient = ambient; }
+glm::vec3 Light::diffuse() { return _diffuse; }
+void Light::diffuse(glm::vec3 diffuse) { _diffuse = diffuse; }
+glm::vec3 Light::specular() { return _specular; }
+void Light::specular(glm::vec3 specular) { _specular = specular; }

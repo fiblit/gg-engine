@@ -1,13 +1,12 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
-#ifndef CAMERA_H
-#define CAMERA_H
+#pragma once
 
-#include <glm/vec3.hpp>
 #include "Transform.h"
+#include <glm/vec3.hpp>
 #ifdef WIN32
-#undef near
-#undef far
+#    undef near
+#    undef far
 #endif
 
 class Shader;
@@ -17,7 +16,7 @@ class Camera {
 public:
     Camera();
 
-    //set/get
+    // set/get
     void fov(float);
     float fov();
     void aspect(float);
@@ -27,22 +26,22 @@ public:
     void far(float);
     float far();
 
-    //place the camera in its local frame
+    // place the camera in its local frame
     void set_pos(glm::vec3);
-    //set orientation based on direction
+    // set orientation based on direction
     void set_rot(glm::vec3 look_dir, glm::vec3 up);
-    //set orientation based on focus
-    //void set_lookat(glm::vec3 lookat, glm::vec3 up);
+    // set orientation based on focus
+    // void set_lookat(glm::vec3 lookat, glm::vec3 up);
 
     glm::vec3 look_dir();
     glm::vec3 up();
     glm::vec3 right();
 
-    //move the camera by vec3 in its local Transform
+    // move the camera by vec3 in its local Transform
     void move(glm::vec3);
-    //rotate the cameras viewing axis by quat. (alternate to setting)
+    // rotate the cameras viewing axis by quat. (alternate to setting)
     void rotate(glm::quat);
-    //zoom in/out. 1 is default.
+    // zoom in/out. 1 is default.
     void zoom(float z);
     float zoom();
 
@@ -60,12 +59,10 @@ private:
     bool _dirty;
     const float _def_fov = 45.f;
     float _fov;
-    const float _def_aspect = 4.f/3.f;
+    const float _def_aspect = 4.f / 3.f;
     float _aspect;
     const float _def_near = .1f;
     float _near;
     const float _def_far = 100.f;
     float _far;
 };
-
-#endif//CAMERA_H

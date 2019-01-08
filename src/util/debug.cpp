@@ -1,37 +1,24 @@
-// Copyright (c) 2016-2018 Dalton Hildreth
+// Copyright (c) 2016-2019 Dalton Hildreth
 // This file is under the MIT license. See the LICENSE file for details.
 #ifdef DEBUG
-#include "debug.h"
-#include <glad.h>
-#include <iostream>
+#    include "debug.h"
+#    include <glad.h>
+#    include <iostream>
+#    include <sring>
 using namespace std;
 
 void glcheck(const char* loc) {
+    std::string s;
     switch (glGetError()) {
-    case GL_INVALID_ENUM:
-        cerr << "Invalid Enum " << loc << "\n";
-        break;
-    case GL_INVALID_VALUE:
-        cerr << "Invalid value " << loc << "\n";
-        break;
-    case GL_INVALID_OPERATION:
-        cerr << "Invalid operation " << loc << "\n";
-        break;
-    case GL_STACK_OVERFLOW:
-        cerr << "Invalid stack overflow " << loc << "\n";
-        break;
-    case GL_STACK_UNDERFLOW:
-        cerr << "Stack underflow " << loc << "\n";
-        break;
-    case GL_OUT_OF_MEMORY:
-        cerr << "Out of memory " << loc << "\n";
-        break;
-    case GL_TABLE_TOO_LARGE:
-        cerr << "Table too large " << loc << "\n";
-        break;
-    default:
-        clog << "No error" << loc << "\n";
-        break;
+    case GL_INVALID_ENUM: s = "Invalid Enum "; break;
+    case GL_INVALID_VALUE: s = "Invalid value "; break;
+    case GL_INVALID_OPERATION: s = "Invalid op "; break;
+    case GL_STACK_OVERFLOW: s = "Stack overflow "; break;
+    case GL_STACK_UNDERFLOW: s = "Stack underflow "; break;
+    case GL_OUT_OF_MEMORY: s = "Out of memory "; break;
+    case GL_TABLE_TOO_LARGE: s = "Table too large "; break;
+    default: s = "No error"; break;
     }
-}   
+    cerr << s << loc << "\n";
+}
 #endif
